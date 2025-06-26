@@ -1,0 +1,26 @@
+CompileFlags:
+  Add:
+    - -Iinclude
+    - -Iinclude/core
+    - -Iinclude/ecs
+    - -Iinclude/external
+    - -Iinclude/utils
+    - -Iinclude/game
+    - -I../include
+    - -I../include/core
+    - -I../include/ecs
+    - -I../include/external
+    - -I../include/utils
+    - -I../include/game
+    - -I../ 
+    - -I../core
+    - -I../ecs
+    - -I../external
+    - -I../utils
+    - -I../game
+    - -I../../include
+    - -I../../include/core
+    - -I../../include/ecs
+    - -I../../include/external
+    - -I../../include/utils
+    - -I../../include/game

@@ -1,0 +1,34 @@
+# Build artifacts
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.exe
+*.out
+
+# Binaries
+main
+
+# Build directories
+/build/
+/bin/
+/obj/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Editor/IDE configs
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+
+
+#project-specific
+assets/
+TODO.md
