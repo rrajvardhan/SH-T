@@ -44,14 +44,14 @@ bool Engine::init(const EngineConfig &config) {
 
 EngineContext Engine::getContext() {
   EngineContext ctx = {
+      .graphics = &_graphics,
       .input = &_input,
       .texture = _textureManager.get(),
       .font = _fontManager.get(),
       .audio = _audioManager.get(),
       .timer = &_timer,
 
-      .screenWidth = _config.renderer.width,
-      .screenHeight = _config.renderer.height,
+      .engineConfig = &_config,
   };
   return ctx;
 }
@@ -73,19 +73,14 @@ void Engine::endFrame() {
   _graphics.present();
   _input.updatePrev();
 
-  if (_config.targetFPS > 0) {
-    float dt = _timer.getDeltaTime();
-    float frameTime = 1.0f / _config.targetFPS;
-
-    if (dt < frameTime) {
-      float delay = (frameTime - dt) * 1000.0f;
-      SDL_Delay((Uint32)delay);
-      dt = frameTime;
-    }
-
-    // LOG_DEBUG("deltatime: ", dt);
-    // LOG_DEBUG("FPS: ", 1.0f / dt);
-  }
-
   _timer.reset();
+
+  float dt = _timer.getDeltaTime();
+  float frameTime = 1.0f / _config.targetFPS;
+
+  if (_config.targetFPS > 0 && dt < frameTime) {
+    float delay = (frameTime - dt) * 1000.0f;
+    SDL_Delay((Uint32)delay);
+    dt = frameTime;
+  }
 }

@@ -17,6 +17,8 @@ CFLAGS := -g -Wall -Wextra -std=c++17 \
   -I$(INC_DIR) \
   -I$(INC_DIR)/core \
   -I$(INC_DIR)/ecs \
+  -I$(INC_DIR)/ecs/systems \
+  -I$(INC_DIR)/ecs/components \
 	-I$(INC_DIR)/utils \
   -I$(INC_DIR)/external \
   -I$(INC_DIR)/game \

@@ -3,24 +3,40 @@ CompileFlags:
     - -Iinclude
     - -Iinclude/core
     - -Iinclude/ecs
+    - -Iinclude/ecs/systems
+    - -Iinclude/ecs/components
     - -Iinclude/external
     - -Iinclude/utils
     - -Iinclude/game
     - -I../include
     - -I../include/core
     - -I../include/ecs
+    - -I../include/ecs/systems
+    - -I../include/ecs/components
     - -I../include/external
     - -I../include/utils
     - -I../include/game
     - -I../ 
     - -I../core
     - -I../ecs
+    - -I../ecs/systems
+    - -I../ecs/components
     - -I../external
     - -I../utils
     - -I../game
+    - -I../../
+    - -I../../core
+    - -I../../ecs
+    - -I../../ecs/systems
+    - -I../../ecs/components
+    - -I../../external
+    - -I../../utils
+    - -I../../game
     - -I../../include
     - -I../../include/core
     - -I../../include/ecs
+    - -I../../include/ecs/systems
+    - -I../../include/ecs/components
     - -I../../include/external
     - -I../../include/utils
     - -I../../include/game

@@ -1,14 +1,17 @@
 #include "Game.hpp"
+#include "InputManager.hpp"
 #include "Log.hpp"
+#include "Overseer.hpp"
 
 Game::Game(EngineContext &ctx) : _running(true), _ctx(ctx) {}
 
 Game::~Game() {}
 
+Overseer ecs;
+
 bool Game::init() {
 
   LOG_INFO("[Game] Game initialized.");
-
   return true;
 }
 

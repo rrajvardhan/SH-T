@@ -14,6 +14,7 @@ public:
 
 private:
   unsigned int _startTicks = 0;
+  unsigned int _lastTicks = 0;
   unsigned int _elapsedTicks = 0;
 
   float _deltaTime = 0.0f;

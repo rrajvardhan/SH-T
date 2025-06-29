@@ -29,15 +29,16 @@ int main() {
   EngineContext ctx = engine->getContext();
 
   Game game(ctx);
-  game.init();
+  if (!game.init()) {
+    LOG_ERROR("Game failed to initialize.");
+    return -1;
+  }
 
-  while (engine->isRunning()) {
+  while (game.isRunning()) {
     engine->beginFrame();
 
-    if (game.isRunning()) {
-      game.update();
-      game.render();
-    }
+    game.update();
+    game.render();
 
     engine->endFrame();
   }
