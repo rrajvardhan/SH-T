@@ -5,16 +5,21 @@
 #include <array>
 #include <queue>
 
-class EntityManager {
+class EntityManager
+{
 public:
-  EntityManager() {
-    for (Entity entity = 0; entity < MAX_ENTITIES; entity++) {
+  EntityManager()
+  {
+    for (Entity entity = 0; entity < MAX_ENTITIES; entity++)
+    {
       _availableEntities.push(entity);
     }
   }
-  Entity createEntity() {
+  Entity createEntity()
+  {
 
-    if (_livingEntityCount > MAX_ENTITIES) {
+    if (_livingEntityCount > MAX_ENTITIES)
+    {
       LOG_DEBUG("[EntityManager] Too many entities exists, cannot create more!!");
     }
 
@@ -25,9 +30,11 @@ public:
     return id;
   }
 
-  void destroyEntity(Entity entity) {
+  void destroyEntity(Entity entity)
+  {
 
-    if (entity > MAX_ENTITIES) {
+    if (entity > MAX_ENTITIES)
+    {
       LOG_DEBUG("[EntityManager] Entity out of range!!");
     }
 
@@ -36,18 +43,22 @@ public:
     _livingEntityCount--;
   }
 
-  void setSignature(Entity entity, Signature signature) {
+  void setSignature(Entity entity, Signature signature)
+  {
 
-    if (entity > MAX_ENTITIES) {
+    if (entity > MAX_ENTITIES)
+    {
       LOG_DEBUG("[EntityManager] Entity out of range!!");
     }
 
     _signatures[entity] = signature;
   }
 
-  Signature getSignature(Entity entity) {
+  Signature getSignature(Entity entity)
+  {
 
-    if (entity > MAX_ENTITIES) {
+    if (entity > MAX_ENTITIES)
+    {
       LOG_DEBUG("[EntityManager] Entity out of range!!");
     }
 
@@ -55,7 +66,7 @@ public:
   }
 
 private:
-  std::queue<Entity> _availableEntities{};
+  std::queue<Entity>                  _availableEntities{};
   std::array<Signature, MAX_ENTITIES> _signatures{};
-  uint32_t _livingEntityCount{};
+  uint32_t                            _livingEntityCount{};
 };

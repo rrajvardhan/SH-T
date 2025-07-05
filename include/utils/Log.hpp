@@ -4,44 +4,55 @@
 #include <iostream>
 #include <sstream>
 
-enum class LogLevel { INFO, SUCCESS, ERROR, DEBUG };
+enum class LogLevel
+{
+  INFO,
+  SUCCESS,
+  ERROR,
+  DEBUG
+};
 
-class Logger {
+class Logger
+{
 public:
-  template <typename... Args> static void log(LogLevel level, Args &&...args) {
+  template <typename... Args>
+  static void log(LogLevel level, Args&&... args)
+  {
     std::ostringstream oss;
     (oss << ... << args);
 
     std::string prefix, color;
-    switch (level) {
+    switch (level)
+    {
     case LogLevel::INFO:
       prefix = "[INFO]  ";
-      color = "\033[33m";
+      color  = "\033[33m";
       break;
     case LogLevel::SUCCESS:
       prefix = "[✓]     ";
-      color = "\033[32m";
+      color  = "\033[32m";
       break;
     case LogLevel::ERROR:
       prefix = "[✗]     ";
-      color = "\033[31m";
+      color  = "\033[31m";
       break;
     case LogLevel::DEBUG:
       prefix = "[DEBUG] ";
-      color = "\033[35m";
+      color  = "\033[35m";
       break;
     }
 
-    auto &out = (level == LogLevel::ERROR) ? std::cerr : std::cout;
+    auto& out = (level == LogLevel::ERROR) ? std::cerr : std::cout;
     // out << color << prefix << oss.str() << "\033[0m\n";
 
     out << timestamp() << color << " | " << prefix << oss.str() << "\033[0m\n";
   }
 
 private:
-  static std::string timestamp() {
+  static std::string timestamp()
+  {
     std::time_t t = std::time(nullptr);
-    char buf[20];
+    char        buf[20];
     std::strftime(buf, sizeof(buf), "%H:%M:%S", std::localtime(&t));
     return buf;
   }

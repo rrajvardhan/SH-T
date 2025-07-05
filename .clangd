@@ -3,40 +3,60 @@ CompileFlags:
     - -Iinclude
     - -Iinclude/core
     - -Iinclude/ecs
+    - -Iinclude/ecs/core
     - -Iinclude/ecs/systems
     - -Iinclude/ecs/components
+    - -Iinclude/ecs/events
     - -Iinclude/external
+    - -Iinclude/imgui
+    - -Iinclude/backends
     - -Iinclude/utils
     - -Iinclude/game
     - -I../include
     - -I../include/core
     - -I../include/ecs
+    - -I../include/ecs/core
     - -I../include/ecs/systems
     - -I../include/ecs/components
+    - -I../include/ecs/events
     - -I../include/external
+    - -I../include/external/imgui
+    - -I../include/external/imgui/backends
     - -I../include/utils
     - -I../include/game
     - -I../ 
     - -I../core
     - -I../ecs
+    - -I../ecs/core
     - -I../ecs/systems
     - -I../ecs/components
+    - -I../ecs/events
     - -I../external
+    - -I../external/imgui
+    - -I../external/imgui/backends
     - -I../utils
     - -I../game
     - -I../../
     - -I../../core
     - -I../../ecs
+    - -I../../ecs/core
     - -I../../ecs/systems
     - -I../../ecs/components
+    - -I../../ecs/events
     - -I../../external
+    - -I../../external/imgui
+    - -I../../external/imgui/backends
     - -I../../utils
     - -I../../game
     - -I../../include
     - -I../../include/core
     - -I../../include/ecs
+    - -I../../include/ecs/core
     - -I../../include/ecs/systems
     - -I../../include/ecs/components
+    - -I../../include/ecs/events
     - -I../../include/external
+    - -I../../include/external/imgui
+    - -I../../include/external/imgui/backends
     - -I../../include/utils
     - -I../../include/game

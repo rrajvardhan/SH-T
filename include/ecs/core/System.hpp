@@ -3,7 +3,8 @@
 #include "Types.hpp"
 #include <set>
 
-class System {
+class System
+{
 public:
   std::set<Entity> _entities;
 };

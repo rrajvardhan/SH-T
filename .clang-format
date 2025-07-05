@@ -1,3 +1,42 @@
----
-Language: Cpp
-ColumnLimit: 120
+# Base style
+BasedOnStyle: GNU
+
+IndentWidth: 2              
+TabWidth: 2
+UseTab: Never               
+
+BreakBeforeBraces: Allman  
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: InlineOnly
+
+AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakAfterReturnType: TopLevel
+BinPackParameters: false
+BinPackArguments: false
+AlignAfterOpenBracket: Align
+AlignOperands: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+
+PointerAlignment: Left     # `int* ptr` instead of `int *ptr`
+SpaceBeforeParens: ControlStatements
+SpacesInAngles: false
+SpacesInContainerLiterals: true
+SpaceAfterCStyleCast: true
+
+ColumnLimit: 100
+
+SortIncludes: true
+IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex:           '^<.*\.h>'
+    Priority:        1
+    SortPriority:    0
+  - Regex:           '^".*\.hpp"'
+    Priority:        2
+    SortPriority:    1
+
+# Disable constructor initializer binpacking
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+BreakConstructorInitializers: BeforeComma

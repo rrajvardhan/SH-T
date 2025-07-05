@@ -5,13 +5,21 @@
 #include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_stdinc.h>
 
-class InputManager {
+class InputManager
+{
 
 public:
   InputManager();
   ~InputManager();
 
-  enum MOUSE_BUTTON { left = 0, right, middle, back, forward };
+  enum MOUSE_BUTTON
+  {
+    left = 0,
+    right,
+    middle,
+    back,
+    forward
+  };
 
   bool keyDown(SDL_Scancode scancode);
   bool keyPressed(SDL_Scancode scancode);
@@ -27,9 +35,9 @@ public:
   void updatePrev();
 
 private:
-  const Uint8 *_keyboardState;
-  Uint8 *_prevKeyboardState;
-  int _keyLength;
+  const Uint8* _keyboardState;
+  Uint8*       _prevKeyboardState;
+  int          _keyLength;
 
   Uint32 _prevMouseState;
   Uint32 _mouseState;

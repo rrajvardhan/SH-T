@@ -14,13 +14,18 @@ INC_DIR := include
 
 # === Compilation Flags ===
 CFLAGS := -g -Wall -Wextra -std=c++17 \
+  -I/usr/include/SDL2 -D_REENTRANT \
   -I$(INC_DIR) \
   -I$(INC_DIR)/core \
   -I$(INC_DIR)/ecs \
+  -I$(INC_DIR)/ecs/core \
   -I$(INC_DIR)/ecs/systems \
   -I$(INC_DIR)/ecs/components \
+  -I$(INC_DIR)/ecs/events \
 	-I$(INC_DIR)/utils \
   -I$(INC_DIR)/external \
+  -I$(INC_DIR)/external/imgui \
+  -I$(INC_DIR)/external/imgui/backends \
   -I$(INC_DIR)/game \
 
 LDFLAGS := -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
