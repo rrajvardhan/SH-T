@@ -5,6 +5,7 @@
 #include "PhysicsComponents.hpp"
 #include "System.hpp"
 #include "Types.hpp"
+#include "World.hpp"
 
 struct AABB
 {
@@ -32,7 +33,7 @@ checkAABBOverlap(const AABB& a, const AABB& b)
 class CollisionSystem : public System
 {
 public:
-  void update(Overseer& ecs)
+  void update(Overseer& ecs, WorldProvider provider)
   {
     for (auto it1 = _entities.begin(); it1 != _entities.end(); ++it1)
     {

@@ -32,23 +32,26 @@ std::shared_ptr<DebugDrawSystem>       debugDraw;
 std::shared_ptr<CollisionSystem>       collisionSystem;
 std::shared_ptr<SpriteRenderSystem>    spriteRenderer;
 std::shared_ptr<SpriteAnimationSystem> spriteAnimator;
-std::shared_ptr<CameraSystem>          cs;
+std::shared_ptr<FollowCameraSystem>    cs;
 
 EventBus eventBus;
 
-Entity c;      // Camera entity
-Entity player; // Player entity
+Entity c;
+Entity player;
 
 bool
 World::init()
 {
+  setViewport(_provider.service.graphics->getScreenWidth(),
+              _provider.service.graphics->getScreenHeight());
+
   ecs.init();
   ecs.registerComponent<Transform>();
   ecs.registerComponent<RigidBody>();
   ecs.registerComponent<Force>();
   ecs.registerComponent<Renderable>();
   ecs.registerComponent<Collider>();
-  ecs.registerComponent<Camera>();
+  ecs.registerComponent<FollowCamera>();
   ecs.registerComponent<Sprite>();
   ecs.registerComponent<SpriteAnimator>();
 
@@ -74,10 +77,10 @@ World::init()
   csig.set(ecs.getComponentType<Collider>());
   ecs.setSystemSignature<CollisionSystem>(csig);
 
-  cs = ecs.registerSystem<CameraSystem>();
+  cs = ecs.registerSystem<FollowCameraSystem>();
   Signature css;
-  css.set(ecs.getComponentType<Camera>());
-  ecs.setSystemSignature<CameraSystem>(css);
+  css.set(ecs.getComponentType<FollowCamera>());
+  ecs.setSystemSignature<FollowCameraSystem>(css);
 
   spriteRenderer = ecs.registerSystem<SpriteRenderSystem>();
   Signature ssig;
@@ -92,49 +95,29 @@ World::init()
   ecs.setSystemSignature<SpriteAnimationSystem>(animSig);
 
   _provider.service.texture->addTexture("test", "assets/char_spritesheet.png");
-  _provider.service.texture->addTexture("col", "assets/collisionTex.png");
   SDL_Texture* test = _provider.service.texture->getTexture("test");
-  SDL_Texture* col  = _provider.service.texture->getTexture("col");
-  // Player
 
   player = ecs.createEntity();
-  ecs.addComponent(player, Transform{ { 0.0f, 200.0f } });
+  ecs.addComponent(player, Transform{ { 0.0f, 100.0f } });
   ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
-  ecs.addComponent(player, Collider{ { 40.0f, 60.0f }, { 0.0f, 0.0f }, true });
+  ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
+  ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
+  ecs.addComponent(player, Sprite{ .texture = test, .srcRect = { 16, 16, 16, 16 }, .scale = 5.0f });
 
-  {
-    player = ecs.createEntity();
-    ecs.addComponent(player, Transform{ { 0.0f, 100.0f } });
-    ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
-    ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
-    ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
-    ecs.addComponent(player,
-                     Sprite{ .texture = test, .srcRect = { 16, 16, 16, 16 }, .scale = 5.0f });
+  SpriteAnimator animator;
+  animator.animations["idle"] = Animation(
+      {
+          { { 16 * 1, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 2, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 3, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 4, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 5, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 6, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
+      },
+      150);
 
-    SpriteAnimator animator;
-    animator.animations["idle"] = Animation(
-        {
-            { { 16 * 1, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-            { { 16 * 2, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-            { { 16 * 3, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-            { { 16 * 4, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-            { { 16 * 5, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-            { { 16 * 6, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-        },
-        150);
-
-    animator.currentAnim = "idle";
-
-    ecs.addComponent(player, animator);
-  }
-
-  {
-    Entity player = ecs.createEntity();
-    ecs.addComponent(player, Transform{ { 0.0f, 0.0f } });
-    ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
-    ecs.addComponent(player, Collider{ { 90.0f, 90.0f }, {}, true });
-    ecs.addComponent(player, Sprite{ .texture = col, .srcRect = { 0, 0, 16, 16 }, .scale = 5.0f });
-  }
+  animator.currentAnim = "idle";
+  ecs.addComponent(player, animator);
 
   // Ground
   Entity ground = ecs.createEntity();
@@ -143,10 +126,10 @@ World::init()
 
   // Camera
   c = ecs.createEntity();
-  ecs.addComponent(c, Camera{});
+  ecs.addComponent(c, FollowCamera{ .target = player, .isActive = true });
   ecs.addComponent(c, Transform{ { 0.0f, 0.0f } });
 
-  LOG_INFO("[World] Platformer initialized.");
+  LOG_INFO("[World] initialized.");
   return true;
 }
 
@@ -162,9 +145,8 @@ World::render()
 void
 World::update()
 {
-
-  spriteAnimator->update(ecs, _provider.service.timer->getDeltaTime());
-  physics->update(ecs, _provider.service.timer->getDeltaTime());
-  collisionSystem->update(ecs);
+  spriteAnimator->update(ecs, _provider);
+  physics->update(ecs, _provider);
+  collisionSystem->update(ecs, _provider);
   cs->update(ecs, _provider);
 }

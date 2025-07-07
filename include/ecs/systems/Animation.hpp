@@ -1,14 +1,17 @@
 #pragma once
 #include "Overseer.hpp"
 #include "SpriteComponents.hpp"
+#include "World.hpp"
 
 class SpriteAnimationSystem : public System
 {
 public:
-  void update(Overseer& ecs, float dt)
+  void update(Overseer& ecs, WorldProvider provider)
   {
     for (auto entity : _entities)
     {
+      float dt = provider.service.timer->getDeltaTime();
+
       auto& animator = ecs.getComponent<SpriteAnimator>(entity);
       auto& sprite   = ecs.getComponent<Sprite>(entity);
 

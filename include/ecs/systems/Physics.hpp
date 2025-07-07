@@ -2,14 +2,17 @@
 
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "World.hpp"
 
 class PhysicsSystem : public System
 {
 public:
-  void update(Overseer& ecs, float dt)
+  void update(Overseer& ecs, WorldProvider provider)
   {
     for (auto entity : _entities)
     {
+      float dt = provider.service.timer->getDeltaTime();
+
       auto& rb = ecs.getComponent<RigidBody>(entity);
       auto& tr = ecs.getComponent<Transform>(entity);
 

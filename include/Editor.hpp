@@ -8,15 +8,12 @@ class Editor
 public:
   Editor(World* world, ServiceContext& ctx);
 
-  void render(); // Renders the full editor UI
-
+  void render();
+  void update();
   void togglePause() { _paused = !_paused; }
   bool isPaused() const { return _paused; }
 
 private:
-  void renderDockspace();
-  void renderGamePanel();
-  void renderSpawnerPanel();
   void renderDebugInfo();
 
   SDL_Texture* _gameTexture = nullptr;

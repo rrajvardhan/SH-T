@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Types.hpp"
-struct Camera
+struct FollowCamera
 {
-  Entity target = INVALID_ENTITY;
+  Entity target   = INVALID_ENTITY;
+  bool   isActive = false;
 };

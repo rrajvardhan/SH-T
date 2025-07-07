@@ -32,6 +32,8 @@ Application::init(EngineConfig& cfg)
     return false;
   }
 
+  _world->setViewport(_ctx.graphics->getScreenWidth(), _ctx.graphics->getScreenHeight());
+
   _editor = new Editor(_world, _ctx); // Create the Editor
 
   IMGUI_CHECKVERSION();
@@ -41,14 +43,7 @@ Application::init(EngineConfig& cfg)
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
 
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
-
-  // Setup scaling
-  ImGuiStyle& style = ImGui::GetStyle();
+  ImGui::StyleColorsClassic();
 
   ImGui_ImplSDL2_InitForSDLRenderer(_ctx.graphics->getWindow(), _ctx.graphics->getRenderer());
   ImGui_ImplSDLRenderer2_Init(_ctx.graphics->getRenderer());
@@ -73,11 +68,6 @@ Application::run()
     processInput();
     update();
     render();
-
-    // game is used for debug currently
-    // IF(ediotrMOde){
-    // render imgui over
-    // }
 
     _ctx.graphics->present();
     _ctx.input->updatePrev();
@@ -109,6 +99,7 @@ Application::pollEvents()
         _cfg.renderer.height = _height;
 
         _ctx.graphics->onResize(_width, _height);
+        _world->setViewport(_width, _height);
       }
       break;
     }
@@ -139,14 +130,18 @@ Application::processInput()
   }
 }
 
-bool _paused = false;
-
 void
 Application::update()
 {
-
-  if (!_editor->isPaused())
+  if (_editor->isPaused())
+  {
+    _editor->update();
+  }
+  else
+  {
     _world->update();
+    _editor->update();
+  }
 }
 
 void
@@ -157,7 +152,8 @@ Application::render()
   ImGui_ImplSDLRenderer2_NewFrame();
   ImGui::NewFrame();
 
-  _editor->render(); // Boom. All UI goes here.
+  _world->render();
+  _editor->render();
 
   ImGui::Render();
   ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), _ctx.graphics->getRenderer());
