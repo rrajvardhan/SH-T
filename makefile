@@ -26,7 +26,6 @@ CFLAGS := -g -Wall -Wextra -std=c++17 \
   -I$(INC_DIR)/external \
   -I$(INC_DIR)/external/imgui \
   -I$(INC_DIR)/external/imgui/backends \
-  -I$(INC_DIR)/game \
 
 LDFLAGS := -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
 

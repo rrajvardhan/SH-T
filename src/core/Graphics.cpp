@@ -53,6 +53,8 @@ Graphics::onResize(int width, int height)
 {
   _screenWidth  = width;
   _screenHeight = height;
+
+  SDL_RenderSetViewport(_renderer, nullptr);
 }
 
 void

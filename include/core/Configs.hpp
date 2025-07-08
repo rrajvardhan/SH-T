@@ -10,7 +10,7 @@ struct RendererConfig
   int         y             = SDL_WINDOWPOS_CENTERED;
   int         width         = 1600;
   int         height        = 900;
-  int         windowFlags   = SDL_WINDOW_SHOWN;
+  int         windowFlags   = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
   int         rendererFlags = SDL_RENDERER_ACCELERATED;
 };
 

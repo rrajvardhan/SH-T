@@ -3,7 +3,9 @@
 #include "Log.hpp"
 #include "Types.hpp"
 #include <array>
+#include <cstdint>
 #include <queue>
+#include <set>
 
 class EntityManager
 {
@@ -18,7 +20,7 @@ public:
   Entity createEntity()
   {
 
-    if (_livingEntityCount > MAX_ENTITIES)
+    if (_livingEntityCount >= MAX_ENTITIES)
     {
       LOG_DEBUG("[EntityManager] Too many entities exists, cannot create more!!");
     }
@@ -26,6 +28,7 @@ public:
     Entity id = _availableEntities.front();
     _availableEntities.pop();
     _livingEntityCount++;
+    _livingEntities.insert(id);
 
     return id;
   }
@@ -33,7 +36,7 @@ public:
   void destroyEntity(Entity entity)
   {
 
-    if (entity > MAX_ENTITIES)
+    if (entity >= MAX_ENTITIES)
     {
       LOG_DEBUG("[EntityManager] Entity out of range!!");
     }
@@ -41,12 +44,13 @@ public:
     _signatures[entity].reset();
     _availableEntities.push(entity);
     _livingEntityCount--;
+    _livingEntities.erase(entity);
   }
 
   void setSignature(Entity entity, Signature signature)
   {
 
-    if (entity > MAX_ENTITIES)
+    if (entity >= MAX_ENTITIES)
     {
       LOG_DEBUG("[EntityManager] Entity out of range!!");
     }
@@ -65,8 +69,12 @@ public:
     return _signatures[entity];
   }
 
+  const std::set<Entity>& getLivingEntities() const { return _livingEntities; }
+
 private:
   std::queue<Entity>                  _availableEntities{};
   std::array<Signature, MAX_ENTITIES> _signatures{};
   uint32_t                            _livingEntityCount{};
+
+  std::set<Entity> _livingEntities;
 };

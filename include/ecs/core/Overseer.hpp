@@ -26,6 +26,8 @@ public:
     _systemManager->destroyEntity(entity);
   }
 
+  const std::set<Entity>& getEntities() const { return _entityManager->getLivingEntities(); }
+
   // Component methods
   template <typename T>
   void registerComponent()

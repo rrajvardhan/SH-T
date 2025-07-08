@@ -34,17 +34,28 @@ Application::init(EngineConfig& cfg)
 
   _world->setViewport(_ctx.graphics->getScreenWidth(), _ctx.graphics->getScreenHeight());
 
-  _editor = new Editor(_world, _ctx); // Create the Editor
+  _editor = new Editor(_world, _ctx);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
   (void) io;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+  io.FontGlobalScale = 1.2f;
+  io.Fonts->Clear();
+  ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 18.0f);
+  if (!customFont)
+  {
+    LOG_ERROR("[ImGui] Failed to load JetBrains Mono font!");
+  }
 
   ImGui::StyleColorsClassic();
 
+  ImGui_ImplSDLRenderer2_CreateDeviceObjects();
   ImGui_ImplSDL2_InitForSDLRenderer(_ctx.graphics->getWindow(), _ctx.graphics->getRenderer());
   ImGui_ImplSDLRenderer2_Init(_ctx.graphics->getRenderer());
 
@@ -90,7 +101,8 @@ Application::pollEvents()
       break;
 
     case SDL_WINDOWEVENT:
-      if (_event.window.event == SDL_WINDOWEVENT_RESIZED)
+      if (_event.window.event == SDL_WINDOWEVENT_RESIZED
+          || _event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
       {
         _width  = _event.window.data1;
         _height = _event.window.data2;
@@ -133,26 +145,19 @@ Application::processInput()
 void
 Application::update()
 {
-  if (_editor->isPaused())
-  {
-    _editor->update();
-  }
-  else
-  {
+  _editor->update();
+
+  if (!_editor->isActive())
     _world->update();
-    _editor->update();
-  }
 }
 
 void
 Application::render()
 {
-
   ImGui_ImplSDL2_NewFrame();
   ImGui_ImplSDLRenderer2_NewFrame();
   ImGui::NewFrame();
 
-  _world->render();
   _editor->render();
 
   ImGui::Render();

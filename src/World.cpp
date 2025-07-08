@@ -14,6 +14,7 @@
 #include "SpriteComponents.hpp"
 #include "SpriteRender.hpp"
 #include "Types.hpp"
+#include "UtilComponents.hpp"
 #include "Vector2D.hpp"
 #include "World.hpp"
 #include <SDL2/SDL_scancode.h>
@@ -42,9 +43,6 @@ Entity player;
 bool
 World::init()
 {
-  setViewport(_provider.service.graphics->getScreenWidth(),
-              _provider.service.graphics->getScreenHeight());
-
   ecs.init();
   ecs.registerComponent<Transform>();
   ecs.registerComponent<RigidBody>();
@@ -54,6 +52,7 @@ World::init()
   ecs.registerComponent<FollowCamera>();
   ecs.registerComponent<Sprite>();
   ecs.registerComponent<SpriteAnimator>();
+  ecs.registerComponent<Identification>();
 
   physics = ecs.registerSystem<PhysicsSystem>();
   Signature psig;
@@ -118,11 +117,13 @@ World::init()
 
   animator.currentAnim = "idle";
   ecs.addComponent(player, animator);
+  ecs.addComponent(player, Identification{ "Player", "Player" });
 
   // Ground
   Entity ground = ecs.createEntity();
   ecs.addComponent(ground, Transform{ { 0.0f, 500.0f } });
   ecs.addComponent(ground, Collider{ { 1600.0f, 16.0f }, { 0.0f, 0.0f }, true });
+  ecs.addComponent(ground, Renderable{ { 1600.0f, 16.0f }, { 0, 255, 255, 255 } });
 
   // Camera
   c = ecs.createEntity();
@@ -137,14 +138,34 @@ void
 World::render()
 {
 
-  spriteRenderer->update(ecs, _provider);
   renderables->update(ecs, _provider);
+  spriteRenderer->update(ecs, _provider);
   debugDraw->update(ecs, _provider);
 }
 
 void
 World::update()
 {
+
+  auto& input = *_provider.service.input;
+
+  if (ecs.hasComponent<RigidBody>(player))
+  {
+    auto& rb = ecs.getComponent<RigidBody>(player);
+
+    // Horizontal movement
+    if (input.keyDown(SDL_SCANCODE_A))
+      rb.velocity.x = -200.0f;
+    else if (input.keyDown(SDL_SCANCODE_D))
+      rb.velocity.x = 200.0f;
+    else
+      rb.velocity.x = 0.0f;
+
+    // Jump
+    if (input.keyDown(SDL_SCANCODE_SPACE))
+      rb.velocity.y = -600.0f; // instant jump
+  }
+
   spriteAnimator->update(ecs, _provider);
   physics->update(ecs, _provider);
   collisionSystem->update(ecs, _provider);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CameraComponents.hpp"
+#include "Log.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
 #include "Types.hpp"

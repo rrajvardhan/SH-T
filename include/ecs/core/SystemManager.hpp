@@ -64,6 +64,6 @@ public:
   }
 
 private:
-  std::unordered_map<std::type_index, Signature>                _signatures{};
-  std::unordered_map<std::type_index, std::shared_ptr<System> > _systems{};
+  std::unordered_map<std::type_index, Signature>               _signatures{};
+  std::unordered_map<std::type_index, std::shared_ptr<System>> _systems{};
 };
