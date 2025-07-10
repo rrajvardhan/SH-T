@@ -27,7 +27,7 @@ public:
       dest.x             = (int) (renderPos.x - provider.getCameraOffset().x - scaledW / 2.0f);
       dest.y             = (int) (renderPos.y - provider.getCameraOffset().y - scaledH / 2.0f);
 
-      provider.service.texture->drawTexture(sprite.texture, &sprite.srcRect, &dest);
+      provider.service.texture->drawTexture(sprite.texture, &sprite.srcRect, &dest, sprite.flip);
     }
   }
 };

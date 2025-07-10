@@ -21,6 +21,7 @@ private:
   void renderComponentInspector();
   void renderDebugInfo();
   void renderControls();
+  void spriteThings();
 
   bool _active = true;
 

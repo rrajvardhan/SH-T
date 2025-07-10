@@ -1,7 +1,6 @@
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
 #include "Editor.hpp"
-#include "Log.hpp"
 #include "PhysicsComponents.hpp"
 #include "RenderableComponents.hpp"
 #include "SpriteComponents.hpp"
@@ -70,15 +69,10 @@ Editor::renderDockspace()
                   | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
                   | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
   ImGui::Begin("SH!T DockSpace", nullptr, window_flags);
   ImGuiID dockspace_id = ImGui::GetID("SHITDockspace");
   ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 
-  ImGui::PopStyleVar(3);
   ImGui::End();
 }
 
@@ -171,87 +165,117 @@ Editor::renderComponentInspector()
 
   auto& ecs = _world->getECS();
 
+  if (ecs.hasComponent<Identification>(_selected))
+  {
+    ImGui::Separator();
+    if (ImGui::CollapsingHeader("Identification"))
+    {
+      auto& i = ecs.getComponent<Identification>(_selected);
+      char  nameBuffer[128];
+      strncpy(nameBuffer, i.name.c_str(), sizeof(nameBuffer));
+      nameBuffer[sizeof(nameBuffer) - 1] = '\0';
+
+      if (ImGui::InputText("Name", nameBuffer, sizeof(nameBuffer)))
+      {
+        i.name = std::string(nameBuffer);
+      }
+
+      static char groupBuffer[128] = "";
+      ImGui::InputText("Group", groupBuffer, sizeof(groupBuffer));
+    }
+  }
+
   if (ecs.hasComponent<Transform>(_selected))
   {
-    auto& t = ecs.getComponent<Transform>(_selected);
-    ImGui::Text("Transform");
-    ImGui::DragFloat2("Position", &t.position.x, 1.0f);
+    ImGui::Separator();
+    if (ImGui::CollapsingHeader("Transform"))
+    {
+      auto& t = ecs.getComponent<Transform>(_selected);
+      ImGui::DragFloat2("Position", &t.position.x, 1.0f);
+    }
   }
 
   if (ecs.hasComponent<RigidBody>(_selected))
   {
     ImGui::Separator();
-    auto& rb = ecs.getComponent<RigidBody>(_selected);
-    ImGui::Text("RigidBody");
-    ImGui::DragFloat2("Velocity", &rb.velocity.x, 1.0f);
-    ImGui::DragFloat("Mass", &rb.mass, 1.0f);
+    if (ImGui::CollapsingHeader("RigidBody"))
+    {
+      auto& rb = ecs.getComponent<RigidBody>(_selected);
+      ImGui::DragFloat("Mass", &rb.mass, 1.0f);
+      ImGui::DragFloat2("Velocity", &rb.velocity.x, 1.0f);
+    }
   }
 
   if (ecs.hasComponent<Force>(_selected))
   {
     ImGui::Separator();
-    auto& f = ecs.getComponent<Force>(_selected);
-    ImGui::Text("Force");
-    ImGui::DragFloat2("Force", &f.vector.x, 1.0f);
+    if (ImGui::CollapsingHeader("Force"))
+    {
+      auto& f = ecs.getComponent<Force>(_selected);
+      ImGui::Text("Force");
+      ImGui::DragFloat2("Force", &f.vector.x, 1.0f);
+    }
   }
 
   if (ecs.hasComponent<Collider>(_selected))
   {
     ImGui::Separator();
-    auto& c = ecs.getComponent<Collider>(_selected);
-    ImGui::Text("Collider");
-    ImGui::DragFloat2("Collider Size", &c.size.x, 1.0f);
-    ImGui::DragFloat2("Collider Offset", &c.offset.x, 1.0f);
-    ImGui::Checkbox("static", &c.isStatic);
+    if (ImGui::CollapsingHeader("Collider"))
+    {
+      auto& c = ecs.getComponent<Collider>(_selected);
+      ImGui::Checkbox("static", &c.isStatic);
+      ImGui::DragFloat2("Collider Size", &c.size.x, 1.0f);
+      ImGui::DragFloat2("Collider Offset", &c.offset.x, 1.0f);
+    }
   }
 
   if (ecs.hasComponent<Renderable>(_selected))
   {
 
     ImGui::Separator();
-    auto& r = ecs.getComponent<Renderable>(_selected);
-    ImGui::Text("Renderable");
-
-    ImGui::DragFloat2("Renderable Size", &r.size.x, 1.0f);
-
-    float color[4]
-        = { r.color.r / 255.0f, r.color.g / 255.0f, r.color.b / 255.0f, r.color.a / 255.0f };
-
-    if (ImGui::ColorEdit4("Color", color))
+    if (ImGui::CollapsingHeader("Renderable"))
     {
-      r.color.r = static_cast<Uint8>(color[0] * 255.0f);
-      r.color.g = static_cast<Uint8>(color[1] * 255.0f);
-      r.color.b = static_cast<Uint8>(color[2] * 255.0f);
-      r.color.a = static_cast<Uint8>(color[3] * 255.0f);
+      auto& r = ecs.getComponent<Renderable>(_selected);
+      ImGui::DragFloat2("Renderable Size", &r.size.x, 1.0f);
+      float color[4]
+          = { r.color.r / 255.0f, r.color.g / 255.0f, r.color.b / 255.0f, r.color.a / 255.0f };
+      if (ImGui::ColorEdit4("Color", color))
+      {
+        r.color.r = static_cast<Uint8>(color[0] * 255.0f);
+        r.color.g = static_cast<Uint8>(color[1] * 255.0f);
+        r.color.b = static_cast<Uint8>(color[2] * 255.0f);
+        r.color.a = static_cast<Uint8>(color[3] * 255.0f);
+      }
     }
-  }
-
-  if (ecs.hasComponent<Sprite>(_selected))
-  {
-    ImGui::Separator();
-    auto& s = ecs.getComponent<Sprite>(_selected);
-    ImGui::Text("Sprite");
-    ImGui::Text("Rect");
-    ImGui::DragInt("Src X", &s.srcRect.x, 1.0f);
-    ImGui::DragInt("Src Y", &s.srcRect.y, 1.0f);
-    ImGui::DragInt("Src W", &s.srcRect.w, 1.0f);
-    ImGui::DragInt("Src H", &s.srcRect.h, 1.0f);
-    ImGui::DragFloat("Scale", &s.scale, 0.1f);
-
-    ImGui::DragFloat2("Sprite Offset", &s.offset.x, 1.0f);
-    ImGui::Combo("Flip", (int*) &s.flip, "None\0Horizontal\0Vertical\0");
   }
 
   if (ecs.hasComponent<FollowCamera>(_selected))
   {
     ImGui::Separator();
-    ImGui::Text("FollowCamera");
-    auto& cam = ecs.getComponent<FollowCamera>(_selected);
-    ImGui::Checkbox("Active ", &cam.isActive);
+    if (ImGui::CollapsingHeader("FollowCamera"))
+    {
+      auto& cam = ecs.getComponent<FollowCamera>(_selected);
+      ImGui::Checkbox("Active ", &cam.isActive);
+    }
   }
+
+  spriteThings();
+
+  ImGui::End();
+}
+
+void
+Editor::spriteThings()
+{
+  auto& ecs = _world->getECS();
+  if (_selected == INVALID_ENTITY)
+    return;
 
   if (ecs.hasComponent<SpriteAnimator>(_selected))
   {
+
+    ImGui::Begin("Sprite Inspector");
+
     ImGui::Separator();
     auto& anim = ecs.getComponent<SpriteAnimator>(_selected);
     ImGui::Text("SpriteAnimator");
@@ -279,6 +303,7 @@ Editor::renderComponentInspector()
         anim.timer        = 0.0f;
       }
     }
+
     ImGui::Text("Current Frame: %d", anim.currentFrame);
     ImGui::Text("Timer: %.2f ms", anim.timer);
 
@@ -288,22 +313,42 @@ Editor::renderComponentInspector()
       {
         if (ImGui::TreeNode(name.c_str()))
         {
-          ImGui::Text("Speed: %d ms", animation.speed);
+          ImGui::DragInt("Speed[ms]", &animation.speed);
           for (size_t i = 0; i < animation.frames.size(); ++i)
           {
             auto& frame = animation.frames[i];
             ImGui::Text("Frame %d", static_cast<int>(i));
-            ImGui::Text(
-                "Rect: (%d, %d, %d, %d)", frame.rect.x, frame.rect.y, frame.rect.w, frame.rect.h);
+            ImGui::Text("React");
+            ImGui::Text("(%d, %d, %d, %d)", frame.rect.x, frame.rect.y, frame.rect.w, frame.rect.h);
+            ImGui::Text("Offset");
+            ImGui::Text("(%f, %f)", frame.offset.x, frame.offset.y);
           }
           ImGui::TreePop();
         }
       }
       ImGui::TreePop();
     }
+    ImGui::End();
   }
 
-  ImGui::End();
+  if (ecs.hasComponent<Sprite>(_selected))
+  {
+
+    ImGui::Begin("Sprite Inspector");
+    ImGui::Separator();
+    auto& s = ecs.getComponent<Sprite>(_selected);
+    ImGui::Text("Sprite");
+    ImGui::Text("Rect");
+    ImGui::DragInt("Src X", &s.srcRect.x, 1.0f);
+    ImGui::DragInt("Src Y", &s.srcRect.y, 1.0f);
+    ImGui::DragInt("Src W", &s.srcRect.w, 1.0f);
+    ImGui::DragInt("Src H", &s.srcRect.h, 1.0f);
+    ImGui::DragFloat("Scale", &s.scale, 0.1f);
+    ImGui::DragFloat2("Sprite Offset", &s.offset.x, 1.0f);
+    ImGui::Combo("Flip", (int*) &s.flip, "None\0Horizontal\0Vertical\0");
+
+    ImGui::End();
+  }
 }
 
 void
@@ -314,8 +359,7 @@ Editor::renderControls()
 
   ImGui::Begin("Toolbar",
                nullptr,
-               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
-                   | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse
+               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse
                    | ImGuiWindowFlags_AlwaysAutoResize);
 
   if (ImGui::Button(_active ? "Play " : "Pause"))

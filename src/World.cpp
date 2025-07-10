@@ -39,6 +39,7 @@ EventBus eventBus;
 
 Entity c;
 Entity player;
+Entity movingPlatform;
 
 bool
 World::init()
@@ -130,6 +131,13 @@ World::init()
   ecs.addComponent(c, FollowCamera{ .target = player, .isActive = true });
   ecs.addComponent(c, Transform{ { 0.0f, 0.0f } });
 
+  // Moving platform
+  movingPlatform = ecs.createEntity();
+  ecs.addComponent(movingPlatform, Transform{ { 0.0f, 400.0f } });
+  ecs.addComponent(movingPlatform, Collider{ { 100.0f, 16.0f }, { 0.0f, 0.0f }, true });
+  ecs.addComponent(movingPlatform, Renderable{ { 100.0f, 16.0f }, { 255, 128, 0, 255 } });
+  ecs.addComponent(movingPlatform, Identification{ "MovingPlatform", "Test" });
+
   LOG_INFO("[World] initialized.");
   return true;
 }
@@ -138,7 +146,7 @@ void
 World::render()
 {
 
-  renderables->update(ecs, _provider);
+  // renderables->update(ecs, _provider);
   spriteRenderer->update(ecs, _provider);
   debugDraw->update(ecs, _provider);
 }
@@ -146,6 +154,23 @@ World::render()
 void
 World::update()
 {
+
+  static float moveTimer = 0.0f;
+  static float moveSpeed = 50.0f;
+  static int   direction = 1;
+
+  if (ecs.hasComponent<Transform>(movingPlatform))
+  {
+    auto& tf = ecs.getComponent<Transform>(movingPlatform);
+    tf.position.x += direction * moveSpeed * _provider.service.timer->getDeltaTime();
+
+    moveTimer += _provider.service.timer->getDeltaTime();
+    if (moveTimer >= 10.0f) // reverse every 2 seconds
+    {
+      direction *= -1;
+      moveTimer = 0.0f;
+    }
+  }
 
   auto& input = *_provider.service.input;
 

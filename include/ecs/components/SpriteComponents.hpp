@@ -11,7 +11,7 @@ struct Sprite
   SDL_Rect         srcRect{ 0, 0, 0, 0 };
   float            scale  = 1.0f;
   SDL_RendererFlip flip   = SDL_FLIP_NONE;
-  Vector2D         offset = { 0.0f, 0.0f }; // new
+  Vector2D         offset = { 0.0f, 0.0f };
 };
 
 struct AnimationFrame

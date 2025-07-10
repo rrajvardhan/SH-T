@@ -1,5 +1,5 @@
-#include "TextureManager.hpp"
 #include "Log.hpp"
+#include "TextureManager.hpp"
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_filesystem.h>
 #include <SDL2/SDL_image.h>
@@ -10,7 +10,7 @@
 TextureManager::TextureManager(SDL_Renderer* renderer) : _renderer(renderer)
 {
   int flags = IMG_INIT_PNG;
-  if (!((IMG_Init(flags)) &flags))
+  if (!((IMG_Init(flags)) & flags))
   {
     LOG_ERROR("[TextureManager] IMG initialization failed: ", IMG_GetError());
   }
@@ -126,6 +126,21 @@ TextureManager::drawTexture(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dest)
   }
 
   SDL_RenderCopy(_renderer, texture, src, dest);
+}
+
+void
+TextureManager::drawTexture(SDL_Texture*     texture,
+                            SDL_Rect*        src,
+                            SDL_Rect*        dest,
+                            SDL_RendererFlip flip)
+{
+  if (texture == nullptr)
+  {
+    LOG_ERROR("[TextureManager] Tried to draw null texture.");
+    return;
+  }
+
+  SDL_RenderCopyEx(_renderer, texture, src, dest, 0.0f, nullptr, flip);
 }
 
 bool

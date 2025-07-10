@@ -16,6 +16,10 @@ public:
   void addTexture(const std::string& id, const std::string& path);
   void drawTexture(SDL_Texture* texture);
   void drawTexture(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dest);
+  void drawTexture(SDL_Texture*     texture,
+                   SDL_Rect*        src,
+                   SDL_Rect*        dest,
+                   SDL_RendererFlip flip = SDL_FLIP_NONE);
   bool hasTexture(const std::string& id) const;
   void unloadTexture(const std::string& id);
 

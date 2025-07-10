@@ -45,7 +45,7 @@ Application::init(EngineConfig& cfg)
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-  io.FontGlobalScale = 1.2f;
+  io.FontGlobalScale = 1.5f;
   io.Fonts->Clear();
   ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 18.0f);
   if (!customFont)
@@ -54,6 +54,10 @@ Application::init(EngineConfig& cfg)
   }
 
   ImGui::StyleColorsClassic();
+
+  ImGuiStyle& style   = ImGui::GetStyle();
+  style.WindowPadding = ImVec2(0, 0);
+  style.ScrollbarSize = 0;
 
   ImGui_ImplSDLRenderer2_CreateDeviceObjects();
   ImGui_ImplSDL2_InitForSDLRenderer(_ctx.graphics->getWindow(), _ctx.graphics->getRenderer());

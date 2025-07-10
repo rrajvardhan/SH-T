@@ -19,7 +19,7 @@ public:
       if (anim.frames.empty())
         continue;
 
-      animator.timer += dt * 1000.0f; // convert seconds to milliseconds
+      animator.timer += dt * 1000.0f;
       if (animator.timer >= anim.speed)
       {
         animator.timer        = 0.0f;
