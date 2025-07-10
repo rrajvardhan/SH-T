@@ -2,9 +2,9 @@
 
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "Provider.hpp"
 #include "SpriteComponents.hpp"
 #include "Vector2D.hpp"
-#include "World.hpp"
 
 class SpriteRenderSystem : public System
 {

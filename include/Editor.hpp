@@ -34,4 +34,9 @@ private:
   ServiceContext _ctx;
 
   Entity _selected = INVALID_ENTITY;
+
+  std::vector<Entity> _entitiesToDestroy;
+
+  void markEntityForDeletion(Entity e);
+  void flushDestroyedEntities();
 };

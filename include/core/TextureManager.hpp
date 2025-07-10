@@ -23,6 +23,8 @@ public:
   bool hasTexture(const std::string& id) const;
   void unloadTexture(const std::string& id);
 
+  const std::unordered_map<std::string, SDL_Texture*>& getAllTextures() { return _textures; }
+
 private:
   SDL_Renderer*                                 _renderer;
   std::unordered_map<std::string, SDL_Texture*> _textures;

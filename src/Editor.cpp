@@ -51,6 +51,10 @@ Editor::render()
   renderEntityList();
   renderComponentInspector();
   renderControls();
+
+  spriteThings();
+
+  flushDestroyedEntities();
 }
 
 void
@@ -105,8 +109,8 @@ Editor::renderGamePanel()
   }
 
   SDL_SetRenderTarget(_ctx.graphics->getRenderer(), gameTexture);
-  SDL_SetRenderDrawColor(_ctx.graphics->getRenderer(), 20, 20, 20, 255);
-  SDL_RenderClear(_ctx.graphics->getRenderer());
+  _ctx.graphics->setDrawColor({ 0, 0, 0, 0 });
+  _ctx.graphics->clear();
 
   _world->setViewport(newW, newH);
   _world->render();
@@ -123,8 +127,18 @@ void
 Editor::renderEntityList()
 {
   ImGui::Begin("Entities");
-
   auto& ecs = _world->getECS();
+
+  if (ImGui::Button("Add Entity"))
+  {
+    Entity newEntity = ecs.createEntity();
+    ecs.addComponent<Identification>(newEntity,
+                                     { "Entity" + std::to_string((uint32_t) newEntity) });
+    ecs.addComponent<Transform>(newEntity, {});
+
+    _selected = newEntity;
+  }
+
   for (Entity entity : ecs.getEntities())
   {
     std::string label = "Entity " + std::to_string((uint32_t) entity);
@@ -144,12 +158,40 @@ Editor::renderEntityList()
     {
       if (ImGui::MenuItem("Delete"))
       {
-        ecs.destroyEntity(entity);
-        if (_selected == entity)
-          _selected = INVALID_ENTITY;
+        markEntityForDeletion(entity);
       }
       ImGui::EndPopup();
     }
+  }
+  ImGui::End();
+
+  int index = 0;
+  ImGui::Begin("System Control");
+  for (auto& sys : _world->getSystems())
+  {
+    int originalOrder = sys.order;
+    ImGui::Separator();
+
+    ImGui::PushID(index++);
+    if (ImGui::CollapsingHeader(sys.name.c_str()))
+    {
+      ImGui::Checkbox("Enabled", &sys.enabled);
+
+      static char phaseBuffer[128];
+      strncpy(phaseBuffer, sys.phase.c_str(), sizeof(phaseBuffer));
+      phaseBuffer[sizeof(phaseBuffer) - 1] = '\0';
+      if (ImGui::InputText("Edit Phase", phaseBuffer, sizeof(phaseBuffer)))
+      {
+        sys.phase = std::string(phaseBuffer);
+      }
+
+      if (ImGui::InputInt("Edit Order", &sys.order))
+      {
+        if (sys.order != originalOrder)
+          _world->resortSystems();
+      }
+    }
+    ImGui::PopID();
   }
 
   ImGui::End();
@@ -256,10 +298,124 @@ Editor::renderComponentInspector()
     {
       auto& cam = ecs.getComponent<FollowCamera>(_selected);
       ImGui::Checkbox("Active ", &cam.isActive);
+      int tmp = static_cast<int>(cam.target);
+      if (ImGui::InputInt("Target", &tmp))
+      {
+        cam.target = static_cast<Entity>(tmp);
+      }
     }
   }
 
-  spriteThings();
+  if (ecs.hasComponent<Sprite>(_selected))
+  {
+    ImGui::Separator();
+    if (ImGui::CollapsingHeader("Sprite"))
+    {
+      auto& s = ecs.getComponent<Sprite>(_selected);
+      ImGui::Text("Sprite");
+      ImGui::Text("Rect");
+      ImGui::DragInt("Src X", &s.srcRect.x, 1.0f);
+      ImGui::DragInt("Src Y", &s.srcRect.y, 1.0f);
+      ImGui::DragInt("Src W", &s.srcRect.w, 1.0f);
+      ImGui::DragInt("Src H", &s.srcRect.h, 1.0f);
+      ImGui::DragFloat("Scale", &s.scale, 0.1f);
+      ImGui::DragFloat2("Sprite Offset", &s.offset.x, 1.0f);
+      ImGui::Combo("Flip", (int*) &s.flip, "None\0Horizontal\0Vertical\0");
+    }
+  }
+
+  if (ecs.hasComponent<SpriteAnimator>(_selected))
+  {
+    ImGui::Separator();
+    if (ImGui::CollapsingHeader("Animation"))
+    {
+      auto& anim = ecs.getComponent<SpriteAnimator>(_selected);
+      if (!anim.animations.empty())
+      {
+        std::vector<const char*> names;
+        for (auto& [key, _] : anim.animations)
+          names.push_back(key.c_str());
+
+        int currentIndex = 0;
+        for (size_t i = 0; i < names.size(); ++i)
+        {
+          if (anim.currentAnim == names[i])
+          {
+            currentIndex = i;
+            break;
+          }
+        }
+
+        if (ImGui::Combo("Current Animation", &currentIndex, names.data(), names.size()))
+        {
+          anim.currentAnim  = names[currentIndex];
+          anim.currentFrame = 0;
+          anim.timer        = 0.0f;
+        }
+      }
+
+      ImGui::Text("Current Frame: %d", anim.currentFrame);
+      ImGui::Text("Timer: %.2f ms", anim.timer);
+
+      if (ImGui::TreeNode("Animations"))
+      {
+        for (auto& [name, animation] : anim.animations)
+        {
+          if (ImGui::TreeNode(name.c_str()))
+          {
+            ImGui::InputInt("Speed[ms]", &animation.speed);
+            for (size_t i = 0; i < animation.frames.size(); ++i)
+            {
+              auto& frame = animation.frames[i];
+              ImGui::Text("Frame %d", static_cast<int>(i));
+              ImGui::Text("React");
+              ImGui::Text(
+                  "(%d, %d, %d, %d)", frame.rect.x, frame.rect.y, frame.rect.w, frame.rect.h);
+              ImGui::Text("Offset");
+              ImGui::Text("(%f, %f)", frame.offset.x, frame.offset.y);
+            }
+            ImGui::TreePop();
+          }
+        }
+        ImGui::TreePop();
+      }
+    }
+  }
+
+  ImGui::Separator();
+  if (ImGui::Button("Add Component"))
+  {
+    ImGui::OpenPopup("AddComponentPopup");
+  }
+
+  if (ImGui::BeginPopup("AddComponentPopup"))
+  {
+    if (!ecs.hasComponent<Identification>(_selected) && ImGui::MenuItem("Identification"))
+      ecs.addComponent<Identification>(_selected, {});
+
+    if (!ecs.hasComponent<RigidBody>(_selected) && ImGui::MenuItem("RigidBody"))
+      ecs.addComponent<RigidBody>(_selected, {});
+
+    if (!ecs.hasComponent<Collider>(_selected) && ImGui::MenuItem("Collider"))
+      ecs.addComponent<Collider>(_selected, {});
+
+    if (!ecs.hasComponent<Force>(_selected) && ImGui::MenuItem("Force"))
+      ecs.addComponent<Force>(_selected, {});
+
+    if (!ecs.hasComponent<Renderable>(_selected) && ImGui::MenuItem("Renderable"))
+      ecs.addComponent<Renderable>(_selected, {});
+
+    if (!ecs.hasComponent<Sprite>(_selected) && ImGui::MenuItem("Sprite"))
+      ecs.addComponent<Sprite>(_selected, {});
+
+    if (!ecs.hasComponent<FollowCamera>(_selected) && ImGui::MenuItem("FollowCamera"))
+      ecs.addComponent<FollowCamera>(_selected, {});
+
+    if (!ecs.hasComponent<SpriteAnimator>(_selected) && ImGui::MenuItem("SpriteAnimator"))
+      ecs.addComponent<SpriteAnimator>(_selected, {});
+
+    ImGui::EndPopup();
+  }
 
   ImGui::End();
 }
@@ -267,88 +423,6 @@ Editor::renderComponentInspector()
 void
 Editor::spriteThings()
 {
-  auto& ecs = _world->getECS();
-  if (_selected == INVALID_ENTITY)
-    return;
-
-  if (ecs.hasComponent<SpriteAnimator>(_selected))
-  {
-
-    ImGui::Begin("Sprite Inspector");
-
-    ImGui::Separator();
-    auto& anim = ecs.getComponent<SpriteAnimator>(_selected);
-    ImGui::Text("SpriteAnimator");
-
-    if (!anim.animations.empty())
-    {
-      std::vector<const char*> names;
-      for (auto& [key, _] : anim.animations)
-        names.push_back(key.c_str());
-
-      int currentIndex = 0;
-      for (size_t i = 0; i < names.size(); ++i)
-      {
-        if (anim.currentAnim == names[i])
-        {
-          currentIndex = i;
-          break;
-        }
-      }
-
-      if (ImGui::Combo("Current Animation", &currentIndex, names.data(), names.size()))
-      {
-        anim.currentAnim  = names[currentIndex];
-        anim.currentFrame = 0;
-        anim.timer        = 0.0f;
-      }
-    }
-
-    ImGui::Text("Current Frame: %d", anim.currentFrame);
-    ImGui::Text("Timer: %.2f ms", anim.timer);
-
-    if (ImGui::TreeNode("Animations"))
-    {
-      for (auto& [name, animation] : anim.animations)
-      {
-        if (ImGui::TreeNode(name.c_str()))
-        {
-          ImGui::DragInt("Speed[ms]", &animation.speed);
-          for (size_t i = 0; i < animation.frames.size(); ++i)
-          {
-            auto& frame = animation.frames[i];
-            ImGui::Text("Frame %d", static_cast<int>(i));
-            ImGui::Text("React");
-            ImGui::Text("(%d, %d, %d, %d)", frame.rect.x, frame.rect.y, frame.rect.w, frame.rect.h);
-            ImGui::Text("Offset");
-            ImGui::Text("(%f, %f)", frame.offset.x, frame.offset.y);
-          }
-          ImGui::TreePop();
-        }
-      }
-      ImGui::TreePop();
-    }
-    ImGui::End();
-  }
-
-  if (ecs.hasComponent<Sprite>(_selected))
-  {
-
-    ImGui::Begin("Sprite Inspector");
-    ImGui::Separator();
-    auto& s = ecs.getComponent<Sprite>(_selected);
-    ImGui::Text("Sprite");
-    ImGui::Text("Rect");
-    ImGui::DragInt("Src X", &s.srcRect.x, 1.0f);
-    ImGui::DragInt("Src Y", &s.srcRect.y, 1.0f);
-    ImGui::DragInt("Src W", &s.srcRect.w, 1.0f);
-    ImGui::DragInt("Src H", &s.srcRect.h, 1.0f);
-    ImGui::DragFloat("Scale", &s.scale, 0.1f);
-    ImGui::DragFloat2("Sprite Offset", &s.offset.x, 1.0f);
-    ImGui::Combo("Flip", (int*) &s.flip, "None\0Horizontal\0Vertical\0");
-
-    ImGui::End();
-  }
 }
 
 void
@@ -383,4 +457,24 @@ Editor::renderDebugInfo()
   ImGui::Begin("Welcome, to SH!T Services!");
   ImGui::Text("If you're seeing this, ImGui docking + game panel is working.");
   ImGui::End();
+}
+
+void
+Editor::markEntityForDeletion(Entity e)
+{
+  _entitiesToDestroy.push_back(e);
+  if (_selected == e)
+    _selected = INVALID_ENTITY;
+}
+
+void
+Editor::flushDestroyedEntities()
+{
+  auto& ecs = _world->getECS();
+  for (Entity e : _entitiesToDestroy)
+  {
+    ecs.destroyEntity(e);
+  }
+
+  _entitiesToDestroy.clear();
 }

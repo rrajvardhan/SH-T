@@ -1,16 +1,15 @@
 #pragma once
 
 #include "CameraComponents.hpp"
-#include "Log.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "Provider.hpp"
 #include "Types.hpp"
-#include "World.hpp"
 
 class FollowCameraSystem : public System
 {
 public:
-  void update(Overseer& ecs, WorldProvider& provider)
+  void update(Overseer& ecs, WorldProvider provider)
   {
 
     for (auto e : _entities)

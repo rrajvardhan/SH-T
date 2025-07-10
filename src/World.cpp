@@ -37,7 +37,6 @@ std::shared_ptr<FollowCameraSystem>    cs;
 
 EventBus eventBus;
 
-Entity c;
 Entity player;
 Entity movingPlatform;
 
@@ -55,40 +54,40 @@ World::init()
   ecs.registerComponent<SpriteAnimator>();
   ecs.registerComponent<Identification>();
 
-  physics = ecs.registerSystem<PhysicsSystem>();
+  physics = registerSystem<PhysicsSystem>("Physics", 11);
   Signature psig;
   psig.set(ecs.getComponentType<Transform>());
   psig.set(ecs.getComponentType<RigidBody>());
   ecs.setSystemSignature<PhysicsSystem>(psig);
 
-  renderables = ecs.registerSystem<RenderSystem>();
+  renderables = registerSystem<RenderSystem>("Renderable", 20, "render");
   Signature rsig;
   rsig.set(ecs.getComponentType<Renderable>());
   ecs.setSystemSignature<RenderSystem>(rsig);
 
-  debugDraw = ecs.registerSystem<DebugDrawSystem>();
+  debugDraw = registerSystem<DebugDrawSystem>("Debug", 22, "render");
   Signature tdSig;
   tdSig.set(ecs.getComponentType<Transform>());
   ecs.setSystemSignature<DebugDrawSystem>(tdSig);
 
-  collisionSystem = ecs.registerSystem<CollisionSystem>();
+  collisionSystem = registerSystem<CollisionSystem>("Collision", 12);
   Signature csig;
   csig.set(ecs.getComponentType<Transform>());
   csig.set(ecs.getComponentType<Collider>());
   ecs.setSystemSignature<CollisionSystem>(csig);
 
-  cs = ecs.registerSystem<FollowCameraSystem>();
+  cs = registerSystem<FollowCameraSystem>("Camera", 13);
   Signature css;
   css.set(ecs.getComponentType<FollowCamera>());
   ecs.setSystemSignature<FollowCameraSystem>(css);
 
-  spriteRenderer = ecs.registerSystem<SpriteRenderSystem>();
+  spriteRenderer = registerSystem<SpriteRenderSystem>("Sprite", 21, "render");
   Signature ssig;
   ssig.set(ecs.getComponentType<Sprite>());
   ssig.set(ecs.getComponentType<Transform>());
   ecs.setSystemSignature<SpriteRenderSystem>(ssig);
 
-  spriteAnimator = ecs.registerSystem<SpriteAnimationSystem>();
+  spriteAnimator = registerSystem<SpriteAnimationSystem>("Animation", 10);
   Signature animSig;
   animSig.set(ecs.getComponentType<Sprite>());
   animSig.set(ecs.getComponentType<SpriteAnimator>());
@@ -126,11 +125,6 @@ World::init()
   ecs.addComponent(ground, Collider{ { 1600.0f, 16.0f }, { 0.0f, 0.0f }, true });
   ecs.addComponent(ground, Renderable{ { 1600.0f, 16.0f }, { 0, 255, 255, 255 } });
 
-  // Camera
-  c = ecs.createEntity();
-  ecs.addComponent(c, FollowCamera{ .target = player, .isActive = true });
-  ecs.addComponent(c, Transform{ { 0.0f, 0.0f } });
-
   // Moving platform
   movingPlatform = ecs.createEntity();
   ecs.addComponent(movingPlatform, Transform{ { 0.0f, 400.0f } });
@@ -145,10 +139,9 @@ World::init()
 void
 World::render()
 {
-
-  // renderables->update(ecs, _provider);
-  spriteRenderer->update(ecs, _provider);
-  debugDraw->update(ecs, _provider);
+  for (auto& system : _systems)
+    if (system.enabled && system.phase == "render")
+      system.func(ecs, _provider);
 }
 
 void
@@ -191,8 +184,7 @@ World::update()
       rb.velocity.y = -600.0f; // instant jump
   }
 
-  spriteAnimator->update(ecs, _provider);
-  physics->update(ecs, _provider);
-  collisionSystem->update(ecs, _provider);
-  cs->update(ecs, _provider);
+  for (auto& system : _systems)
+    if (system.enabled && system.phase == "update")
+      system.func(ecs, _provider);
 }

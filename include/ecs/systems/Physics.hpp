@@ -2,7 +2,7 @@
 
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
-#include "World.hpp"
+#include "Provider.hpp"
 
 class PhysicsSystem : public System
 {

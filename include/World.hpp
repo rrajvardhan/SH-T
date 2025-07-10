@@ -1,25 +1,12 @@
 #pragma once
 
 #include "Overseer.hpp"
+#include "Provider.hpp"
 #include "ServiceContext.hpp"
+#include "SystemEntry.hpp"
 #include "Vector2D.hpp"
-
-struct WorldProvider
-{
-  ServiceContext& service;
-  Vector2D&       cameraOffset;
-
-  int vw;
-  int vh;
-
-  WorldProvider(ServiceContext& ctxRef, Vector2D& camOffsetRef)
-      : service(ctxRef), cameraOffset(camOffsetRef)
-  {
-  }
-
-  const Vector2D& getCameraOffset() const { return cameraOffset; }
-  void            setCameraOffset(const Vector2D& offset) { cameraOffset = offset; }
-};
+#include <algorithm>
+#include <vector>
 
 class World
 {
@@ -40,10 +27,40 @@ public:
 
   Overseer& getECS() { return ecs; }
 
+  std::vector<SystemEntry>& getSystems() { return _systems; }
+
+  void resortSystems()
+  {
+    std::sort(_systems.begin(),
+              _systems.end(),
+              [](const SystemEntry& a, const SystemEntry& b) { return a.order < b.order; });
+  }
+
 private:
   Overseer ecs;
   Vector2D _cameraOffset;
 
   ServiceContext& _ctx;
   WorldProvider   _provider;
+
+  std::vector<SystemEntry> _systems;
+
+  template <typename T>
+  std::shared_ptr<T>
+  registerSystem(const std::string& name, int order, std::string phase = "update")
+  {
+    auto system = ecs.registerSystem<T>();
+
+    SystemEntry entry = { .name    = name,
+                          .phase   = phase,
+                          .order   = order,
+                          .enabled = true,
+                          .func    = [system](Overseer& ecs, const WorldProvider& provider)
+                          { system->update(ecs, provider); } };
+
+    _systems.push_back(std::move(entry));
+    std::sort(_systems.begin(), _systems.end(), [](auto& a, auto& b) { return a.order < b.order; });
+
+    return system;
+  }
 };

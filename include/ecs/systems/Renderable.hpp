@@ -2,8 +2,8 @@
 
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "Provider.hpp"
 #include "RenderableComponents.hpp"
-#include "World.hpp"
 
 class RenderSystem : public System
 {

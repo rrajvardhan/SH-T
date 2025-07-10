@@ -1,7 +1,7 @@
 #pragma once
 #include "Overseer.hpp"
+#include "Provider.hpp"
 #include "SpriteComponents.hpp"
-#include "World.hpp"
 
 class SpriteAnimationSystem : public System
 {

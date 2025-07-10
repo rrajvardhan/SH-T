@@ -3,9 +3,9 @@
 #include "CollisionComponents.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "Provider.hpp"
 #include "System.hpp"
 #include "Types.hpp"
-#include "World.hpp"
 
 struct AABB
 {

@@ -3,7 +3,7 @@
 #include "CollisionComponents.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
-#include "World.hpp"
+#include "Provider.hpp"
 
 class DebugDrawSystem : public System
 {
