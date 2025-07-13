@@ -78,23 +78,3 @@ operator/(const Vector2D& vec, float scalar)
 {
   return (scalar != 0.0f) ? Vector2D(vec.x / scalar, vec.y / scalar) : Vector2D(0.0f, 0.0f);
 }
-
-// -------- Math Utilities -------- //
-
-inline Vector2D
-rotateVector(const Vector2D& vec, float angleDeg)
-{
-  float rad  = angleDeg * DEG_TO_RAD;
-  float cosA = std::cos(rad);
-  float sinA = std::sin(rad);
-  return Vector2D(vec.x * cosA - vec.y * sinA, vec.x * sinA + vec.y * cosA);
-}
-
-// -------- Constants -------- //
-
-constexpr Vector2D VEC2_ZERO  = { 0.0f, 0.0f };
-constexpr Vector2D VEC2_ONE   = { 1.0f, 1.0f };
-constexpr Vector2D VEC2_UP    = { 0.0f, 1.0f };
-constexpr Vector2D VEC2_DOWN  = { 0.0f, -1.0f };
-constexpr Vector2D VEC2_LEFT  = { -1.0f, 0.0f };
-constexpr Vector2D VEC2_RIGHT = { 1.0f, 0.0f };

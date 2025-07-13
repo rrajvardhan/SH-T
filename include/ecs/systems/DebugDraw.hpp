@@ -17,7 +17,7 @@ public:
     {
       const auto& tr = ecs.getComponent<Transform>(entity);
 
-      Vector2D screenPos = tr.position - provider.getCameraOffset();
+      Vector2D screenPos = tr.position - provider.camera.getOffset();
       int      x         = static_cast<int>(screenPos.x);
       int      y         = static_cast<int>(screenPos.y);
 
@@ -60,7 +60,7 @@ public:
         const auto& col      = ecs.getComponent<Collider>(entity);
         Vector2D    halfSize = col.size * 0.5f;
         Vector2D    center   = tr.position + col.offset;
-        Vector2D    topLeft  = center - halfSize - provider.getCameraOffset();
+        Vector2D    topLeft  = center - halfSize - provider.camera.getOffset();
 
         SDL_Color color = col.isStatic ? SDL_Color{ 255, 0, 255, 128 } // Magenta for static
                                        : SDL_Color{ 255, 0, 0, 128 };  // Red for dynamic

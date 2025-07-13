@@ -23,11 +23,19 @@ CFLAGS := -g -Wall -Wextra -std=c++17 \
   -I$(INC_DIR)/ecs/components \
   -I$(INC_DIR)/ecs/events \
 	-I$(INC_DIR)/utils \
+	-I$(INC_DIR)/scripts \
+	-I$(INC_DIR)/editor \
+	-I$(INC_DIR)/world \
   -I$(INC_DIR)/external \
   -I$(INC_DIR)/external/imgui \
   -I$(INC_DIR)/external/imgui/backends \
+  -I$(INC_DIR)/external/sol/ \
+  -I$(INC_DIR)/external/sol/compatibility \
+  -I$(INC_DIR)/external/sol/detail \
+  -I$(INC_DIR)/external/sol/stack \
+  -I$(INC_DIR)/external/sol/utility \
 
-LDFLAGS := -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
+LDFLAGS := -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua
 
 # === alternate ( for macOS )===
 # LDFLAGS := $(shell pkg-config --libs sdl2 SDL2_image SDL2_ttf)

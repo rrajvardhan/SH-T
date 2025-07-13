@@ -20,7 +20,8 @@ public:
       auto& camTr  = ecs.getComponent<Transform>(e);
       auto& camera = ecs.getComponent<FollowCamera>(e);
 
-      Vector2D screenCenter{ provider.vw * 0.5f, provider.vh * 0.5f };
+      Vector2D screenCenter{ provider.camera.getViewportWidth() * 0.5f,
+                             provider.camera.getViewportHeight() * 0.5f };
 
       if (!camera.isActive)
         continue;
@@ -30,7 +31,7 @@ public:
         Vector2D targetPos = ecs.getComponent<Transform>(camera.target).position;
         camTr.position     = targetPos;
 
-        provider.setCameraOffset(camTr.position - screenCenter);
+        provider.camera.setPosition(camTr.position - screenCenter);
       }
     }
   }

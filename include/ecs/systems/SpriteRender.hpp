@@ -16,6 +16,9 @@ public:
       auto& sprite    = ecs.getComponent<Sprite>(entity);
       auto& transform = ecs.getComponent<Transform>(entity);
 
+      if (sprite.texture == nullptr)
+        continue;
+
       int scaledW = (int) (sprite.srcRect.w * sprite.scale);
       int scaledH = (int) (sprite.srcRect.h * sprite.scale);
 
@@ -24,8 +27,8 @@ public:
       dest.h = scaledH;
 
       Vector2D renderPos = transform.position + sprite.offset;
-      dest.x             = (int) (renderPos.x - provider.getCameraOffset().x - scaledW / 2.0f);
-      dest.y             = (int) (renderPos.y - provider.getCameraOffset().y - scaledH / 2.0f);
+      dest.x             = (int) (renderPos.x - provider.camera.getOffset().x - scaledW / 2.0f);
+      dest.y             = (int) (renderPos.y - provider.camera.getOffset().y - scaledH / 2.0f);
 
       provider.service.texture->drawTexture(sprite.texture, &sprite.srcRect, &dest, sprite.flip);
     }

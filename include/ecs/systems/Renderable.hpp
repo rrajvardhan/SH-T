@@ -15,7 +15,7 @@ public:
       auto& tr   = ecs.getComponent<Transform>(entity);
       auto& rend = ecs.getComponent<Renderable>(entity);
 
-      Vector2D screenCenter = tr.position - provider.getCameraOffset();
+      Vector2D screenCenter = tr.position - provider.camera.getOffset();
       Vector2D topLeft      = screenCenter - rend.size * 0.5f;
 
       switch (rend.shape)

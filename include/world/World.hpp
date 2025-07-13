@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Camera2D.hpp"
+#include "GlobalScriptSystem.hpp"
 #include "Overseer.hpp"
 #include "Provider.hpp"
 #include "ServiceContext.hpp"
 #include "SystemEntry.hpp"
-#include "Vector2D.hpp"
 #include <algorithm>
 #include <vector>
 
@@ -18,15 +19,9 @@ public:
   void update();
   void render();
 
-  WorldProvider& getProvider() { return _provider; }
-  void           setViewport(int width, int height)
-  {
-    _provider.vw = width;
-    _provider.vh = height;
-  }
-
-  Overseer& getECS() { return ecs; }
-
+  WorldProvider&            getProvider() { return _provider; }
+  Overseer&                 getECS() { return ecs; }
+  Camera2D&                 getCamera() { return _camera; }
   std::vector<SystemEntry>& getSystems() { return _systems; }
 
   void resortSystems()
@@ -37,12 +32,12 @@ public:
   }
 
 private:
-  Overseer ecs;
-  Vector2D _cameraOffset;
-
-  ServiceContext& _ctx;
-  WorldProvider   _provider;
-
+  Overseer                 ecs;
+  Camera2D                 _camera;
+  ServiceContext&          _ctx;
+  WorldProvider            _provider;
+  sol::state               _lua;
+  GlobalScriptSystem*      _globalScript;
   std::vector<SystemEntry> _systems;
 
   template <typename T>

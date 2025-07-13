@@ -8,10 +8,10 @@ CompileFlags:
     - -Iinclude/ecs/components
     - -Iinclude/ecs/events
     - -Iinclude/external
-    - -Iinclude/imgui
-    - -Iinclude/backends
     - -Iinclude/utils
-    - -Iinclude/game
+    - -Iinclude/scripts
+    - -Iinclude/editor
+    - -Iinclude/world
     - -I../include
     - -I../include/core
     - -I../include/ecs
@@ -23,7 +23,9 @@ CompileFlags:
     - -I../include/external/imgui
     - -I../include/external/imgui/backends
     - -I../include/utils
-    - -I../include/game
+    - -I../include/scripts
+    - -I../include/editor
+    - -I../include/world
     - -I../ 
     - -I../core
     - -I../ecs
@@ -35,7 +37,9 @@ CompileFlags:
     - -I../external/imgui
     - -I../external/imgui/backends
     - -I../utils
-    - -I../game
+    - -I../scripts
+    - -I../world
+    - -I../editor
     - -I../../
     - -I../../core
     - -I../../ecs
@@ -47,7 +51,9 @@ CompileFlags:
     - -I../../external/imgui
     - -I../../external/imgui/backends
     - -I../../utils
-    - -I../../game
+    - -I../../scripts
+    - -I../../editor
+    - -I../../world
     - -I../../include
     - -I../../include/core
     - -I../../include/ecs
@@ -59,4 +65,6 @@ CompileFlags:
     - -I../../include/external/imgui
     - -I../../include/external/imgui/backends
     - -I../../include/utils
-    - -I../../include/game
+    - -I../../include/scripts
+    - -I../../include/editor
+    - -I../../include/world
