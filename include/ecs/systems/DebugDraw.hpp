@@ -4,6 +4,7 @@
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
 #include "Provider.hpp"
+#include <SDL2/SDL_blendmode.h>
 
 class DebugDrawSystem : public System
 {
@@ -13,11 +14,15 @@ public:
     constexpr float MAX_VELOCITY_LENGTH = 50.0f;
     constexpr float MAX_FORCE_LENGTH    = 50.0f;
 
+    provider.service.graphics->setBlendMode(SDL_BLENDMODE_BLEND);
+
+    float zoom = provider.camera.getZoom();
+
     for (auto entity : _entities)
     {
       const auto& tr = ecs.getComponent<Transform>(entity);
 
-      Vector2D screenPos = tr.position - provider.camera.getOffset();
+      Vector2D screenPos = (tr.position - provider.camera.getOffset()) * zoom;
       int      x         = static_cast<int>(screenPos.x);
       int      y         = static_cast<int>(screenPos.y);
 
@@ -30,7 +35,7 @@ public:
         if (mag > 0.0f)
         {
           Vector2D dir    = vel.normalized();
-          float    length = std::min(mag * 10.0f, MAX_VELOCITY_LENGTH);
+          float    length = std::min(mag * 10.0f, MAX_VELOCITY_LENGTH) * zoom;
           int      dx     = static_cast<int>(dir.x * length);
           int      dy     = static_cast<int>(dir.y * length);
 
@@ -47,7 +52,7 @@ public:
         if (mag > 0.0f)
         {
           Vector2D dir    = f.normalized();
-          float    length = std::min(mag * 0.1f, MAX_FORCE_LENGTH);
+          float    length = std::min(mag * 0.1f, MAX_FORCE_LENGTH) * zoom;
           int      dx     = static_cast<int>(dir.x * length);
           int      dy     = static_cast<int>(dir.y * length);
 
@@ -57,24 +62,26 @@ public:
 
       if (ecs.hasComponent<Collider>(entity))
       {
-        const auto& col      = ecs.getComponent<Collider>(entity);
-        Vector2D    halfSize = col.size * 0.5f;
-        Vector2D    center   = tr.position + col.offset;
-        Vector2D    topLeft  = center - halfSize - provider.camera.getOffset();
+        const auto& col = ecs.getComponent<Collider>(entity);
+
+        Vector2D center   = (tr.position + col.offset - provider.camera.getOffset()) * zoom;
+        Vector2D halfSize = col.size * 0.5f * zoom;
+        Vector2D topLeft  = center - halfSize;
 
         SDL_Color color = col.isStatic ? SDL_Color{ 255, 0, 255, 128 } // Magenta for static
                                        : SDL_Color{ 255, 0, 0, 128 };  // Red for dynamic
 
         provider.service.graphics->drawFilledRect(static_cast<int>(topLeft.x),
                                                   static_cast<int>(topLeft.y),
-                                                  static_cast<int>(col.size.x),
-                                                  static_cast<int>(col.size.y),
+                                                  static_cast<int>(col.size.x * zoom),
+                                                  static_cast<int>(col.size.y * zoom),
                                                   color);
       }
 
       // Origin crosshair
-      provider.service.graphics->drawLine(x - 3, y, x + 3, y, { 255, 255, 255, 255 });
-      provider.service.graphics->drawLine(x, y - 3, x, y + 3, { 255, 255, 255, 255 });
+      provider.service.graphics->drawLine(x - 3 * zoom, y, x + 3 * zoom, y, { 255, 255, 255, 255 });
+      provider.service.graphics->drawLine(x, y - 3 * zoom, x, y + 3 * zoom, { 255, 255, 255, 255 });
     }
+    provider.service.graphics->setBlendMode(SDL_BLENDMODE_NONE);
   }
 };

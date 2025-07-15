@@ -1,13 +1,20 @@
 #pragma once
 
+#include "Animation.hpp"
+#include "Camera.hpp"
 #include "Camera2D.hpp"
+#include "Character.hpp"
+#include "Collision.hpp"
+#include "DebugDraw.hpp"
+#include "EventBus.hpp"
 #include "GlobalScriptSystem.hpp"
+#include "MovingPlatform.hpp"
 #include "Overseer.hpp"
+#include "Physics.hpp"
 #include "Provider.hpp"
+#include "Renderable.hpp"
 #include "ServiceContext.hpp"
-#include "SystemEntry.hpp"
-#include <algorithm>
-#include <vector>
+#include "SpriteRender.hpp"
 
 class World
 {
@@ -16,46 +23,34 @@ public:
   ~World();
 
   bool init();
+  void registerMainSystems();
   void update();
   void render();
 
-  WorldProvider&            getProvider() { return _provider; }
-  Overseer&                 getECS() { return ecs; }
-  Camera2D&                 getCamera() { return _camera; }
-  std::vector<SystemEntry>& getSystems() { return _systems; }
+  WorldProvider& getProvider() { return _provider; }
+  Overseer&      getECS() { return _ecs; }
+  Camera2D&      getCamera() { return _camera; }
 
-  void resortSystems()
-  {
-    std::sort(_systems.begin(),
-              _systems.end(),
-              [](const SystemEntry& a, const SystemEntry& b) { return a.order < b.order; });
-  }
+  bool isDebug = false;
 
 private:
-  Overseer                 ecs;
-  Camera2D                 _camera;
-  ServiceContext&          _ctx;
-  WorldProvider            _provider;
-  sol::state               _lua;
-  GlobalScriptSystem*      _globalScript;
-  std::vector<SystemEntry> _systems;
+  Overseer        _ecs;
+  Camera2D        _camera;
+  ServiceContext& _ctx;
+  WorldProvider   _provider;
+  EventBus        _eventbus;
 
-  template <typename T>
-  std::shared_ptr<T>
-  registerSystem(const std::string& name, int order, std::string phase = "update")
-  {
-    auto system = ecs.registerSystem<T>();
+  // Lua scripting System
+  std::unique_ptr<GlobalScriptSystem> _globalScript;
 
-    SystemEntry entry = { .name    = name,
-                          .phase   = phase,
-                          .order   = order,
-                          .enabled = true,
-                          .func    = [system](Overseer& ecs, const WorldProvider& provider)
-                          { system->update(ecs, provider); } };
-
-    _systems.push_back(std::move(entry));
-    std::sort(_systems.begin(), _systems.end(), [](auto& a, auto& b) { return a.order < b.order; });
-
-    return system;
-  }
+  // Main Systems
+  std::shared_ptr<PlatformerCharacterSystem> platformerSystem;
+  std::shared_ptr<MovingPlatformSystem>      movingPlatformSystem;
+  std::shared_ptr<PhysicsSystem>             physicsSystem;
+  std::shared_ptr<RenderSystem>              renderSystem;
+  std::shared_ptr<DebugDrawSystem>           debugDrawSystem;
+  std::shared_ptr<CollisionSystem>           collisionSystem;
+  std::shared_ptr<FollowCameraSystem>        cameraSystem;
+  std::shared_ptr<SpriteSystem>              spriteRenderSystem;
+  std::shared_ptr<AnimationSystem>           spriteAnimationSystem;
 };

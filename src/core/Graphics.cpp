@@ -41,7 +41,6 @@ Graphics::init(const RendererConfig& config)
     LOG_ERROR("[Graphics] Failed to create renderer: ", SDL_GetError());
     return false;
   }
-  SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
 
   _screenWidth  = config.width;
   _screenHeight = config.height;

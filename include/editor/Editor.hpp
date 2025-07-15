@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Overseer.hpp"
 #include "ServiceContext.hpp"
 #include "Types.hpp"
 #include "World.hpp"
@@ -12,6 +13,8 @@ public:
   void render();
   void update();
 
+  void events(SDL_Event* event);
+
   bool isActive() { return _active; }
 
 private:
@@ -21,8 +24,5 @@ private:
   World&          _world;
   ServiceContext& _ctx;
 
-  Entity              _selected = INVALID_ENTITY;
-  std::vector<Entity> _entitiesToDestroy;
-
-  void flushDestroyedEntities();
+  Entity _selected = INVALID_ENTITY;
 };

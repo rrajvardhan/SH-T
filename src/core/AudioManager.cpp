@@ -41,16 +41,7 @@ AudioManager::~AudioManager()
 void
 AudioManager::addMusic(const std::string& id, const std::string& path)
 {
-
-  char* basePath = SDL_GetBasePath();
-  if (!basePath)
-  {
-    LOG_ERROR("Failed to get base path: ", SDL_GetError());
-    return;
-  }
-
-  std::string fullpath = std::string(basePath) + path;
-  SDL_free(basePath);
+  std::string fullpath = path;
 
   Mix_Music* music = Mix_LoadMUS(fullpath.c_str());
   if (!music)
@@ -127,16 +118,7 @@ AudioManager::hasMusic(const std::string& id) const
 void
 AudioManager::addSFX(const std::string& id, const std::string& path)
 {
-
-  char* basePath = SDL_GetBasePath();
-  if (!basePath)
-  {
-    LOG_ERROR("Failed to get base path: ", SDL_GetError());
-    return;
-  }
-
-  std::string fullpath = std::string(basePath) + path;
-  SDL_free(basePath);
+  std::string fullpath = path;
 
   Mix_Chunk* chunk = Mix_LoadWAV(fullpath.c_str());
   if (!chunk)

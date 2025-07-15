@@ -3,7 +3,7 @@
 #include "Provider.hpp"
 #include "SpriteComponents.hpp"
 
-class SpriteAnimationSystem : public System
+class AnimationSystem : public System
 {
 public:
   void update(Overseer& ecs, WorldProvider provider)

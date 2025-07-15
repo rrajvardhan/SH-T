@@ -7,11 +7,14 @@
 
 struct Sprite
 {
-  SDL_Texture*     texture = nullptr;
+  std::string      name;
   SDL_Rect         srcRect{ 0, 0, 0, 0 };
   float            scale  = 1.0f;
   SDL_RendererFlip flip   = SDL_FLIP_NONE;
   Vector2D         offset = { 0.0f, 0.0f };
+  int              layer  = 0;
+
+  SDL_BlendMode blendMode = SDL_BLENDMODE_BLEND;
 };
 
 struct AnimationFrame

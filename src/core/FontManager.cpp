@@ -51,15 +51,8 @@ FontManager::loadFont(const std::string& path, int size)
 void
 FontManager::addFont(const std::string& id, const std::string& path, int size)
 {
-  char* basePath = SDL_GetBasePath();
-  if (!basePath)
-  {
-    LOG_ERROR("[FontManager] Failed to get base path: ", SDL_GetError());
-    return;
-  }
 
-  std::string fullpath = std::string(basePath) + path;
-  SDL_free(basePath);
+  std::string fullpath = path;
 
   TTF_Font* font      = loadFont(fullpath, size);
   auto [it, inserted] = _fonts.insert_or_assign(id, font);

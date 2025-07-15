@@ -22,8 +22,13 @@ public:
     _viewportHeight = height;
   }
 
+  float getZoom() const { return _zoom; }
+  void  setZoom(float zoom) { _zoom = std::max(0.1f, zoom); }
+
 private:
   int      _viewportWidth;
   int      _viewportHeight;
   Vector2D _position;
+
+  float _zoom = 1.0f;
 };

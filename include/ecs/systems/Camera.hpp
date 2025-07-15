@@ -14,8 +14,6 @@ public:
 
     for (auto e : _entities)
     {
-      if (!ecs.hasComponent<FollowCamera>(e))
-        continue;
 
       auto& camTr  = ecs.getComponent<Transform>(e);
       auto& camera = ecs.getComponent<FollowCamera>(e);
@@ -31,6 +29,8 @@ public:
         Vector2D targetPos = ecs.getComponent<Transform>(camera.target).position;
         camTr.position     = targetPos;
 
+        float zoom   = provider.camera.getZoom();
+        screenCenter = screenCenter * (1.0f / zoom);
         provider.camera.setPosition(camTr.position - screenCenter);
       }
     }

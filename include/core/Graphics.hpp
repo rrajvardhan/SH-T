@@ -2,7 +2,9 @@
 
 #include "Configs.hpp"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_blendmode.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_render.h>
 
 class Graphics
 {
@@ -25,6 +27,13 @@ public:
   void setDrawColor(SDL_Color color)
   {
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
+  }
+
+  void setBlendMode(SDL_BlendMode mode) { SDL_SetRenderDrawBlendMode(_renderer, mode); }
+
+  void setTextureBlendMode(SDL_Texture* tex, SDL_BlendMode mode)
+  {
+    SDL_SetTextureBlendMode(tex, mode);
   }
 
   void drawRectOutline(int x, int y, int w, int h, SDL_Color color);

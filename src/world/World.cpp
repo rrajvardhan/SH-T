@@ -5,8 +5,6 @@
 #include "Collision.hpp"
 #include "CollisionComponents.hpp"
 #include "DebugDraw.hpp"
-#include "EventBus.hpp"
-#include "GlobalScriptSystem.hpp"
 #include "MovingPlatform.hpp"
 #include "Objects.hpp"
 #include "Overseer.hpp"
@@ -19,29 +17,14 @@
 #include "Types.hpp"
 #include "UtilComponents.hpp"
 #include "World.hpp"
-#include <SDL2/SDL_scancode.h>
 
-World::World(ServiceContext& ctx) : _camera(), _ctx(ctx), _provider(ctx, _camera)
+World::World(ServiceContext& ctx) : _camera(), _ctx(ctx), _provider(ctx, _camera, _eventbus)
 {
-  ecs.init();
-  ecs.registerComponent<Transform>();
-  ecs.registerComponent<RigidBody>();
-  ecs.registerComponent<Force>();
-  ecs.registerComponent<Renderable>();
-  ecs.registerComponent<Collider>();
-  ecs.registerComponent<FollowCamera>();
-  ecs.registerComponent<Sprite>();
-  ecs.registerComponent<SpriteAnimator>();
-  ecs.registerComponent<Identification>();
-  ecs.registerComponent<PlatformerCharacter>();
-  ecs.registerComponent<MovingPlatform>();
 }
 
 World::~World()
 {
 }
-
-EventBus eventBus;
 
 Entity player;
 Entity movingPlatform;
@@ -49,73 +32,36 @@ Entity movingPlatform;
 bool
 World::init()
 {
+  _ecs.init();
 
-  _lua.open_libraries(
-      sol::lib::base, sol::lib::math, sol::lib::table, sol::lib::package, sol::lib::string);
+  _ecs.registerComponent<Collider>();
+  _ecs.registerComponent<Transform>();
+  _ecs.registerComponent<RigidBody>();
+  _ecs.registerComponent<Force>();
+  _ecs.registerComponent<Renderable>();
+  _ecs.registerComponent<FollowCamera>();
+  _ecs.registerComponent<Sprite>();
+  _ecs.registerComponent<SpriteAnimator>();
+  _ecs.registerComponent<Identification>();
+  _ecs.registerComponent<PlatformerCharacter>();
+  _ecs.registerComponent<MovingPlatform>();
 
-  _globalScript = new GlobalScriptSystem(_lua, "main.lua");
+  registerMainSystems();
 
-  registerSystem<PlatformerCharacterSystem>("Character Movement", 8);
-  Signature chsig;
-  chsig.set(ecs.getComponentType<RigidBody>());
-  chsig.set(ecs.getComponentType<PlatformerCharacter>());
-  ecs.setSystemSignature<PlatformerCharacterSystem>(chsig);
+  _globalScript = std::make_unique<GlobalScriptSystem>();
+  _globalScript->bind(_ecs);
+  _globalScript->loadScript("assets/scripts/main.lua");
 
-  registerSystem<MovingPlatformSystem>("Platfrom Movement", 7);
-  Signature msig;
-  msig.set(ecs.getComponentType<Transform>());
-  msig.set(ecs.getComponentType<MovingPlatform>());
-  ecs.setSystemSignature<MovingPlatformSystem>(msig);
+  //////////////////////////////////////////////////////////////////
+  _provider.service.texture->addTexture("test", "assets/textures/char_spritesheet.png");
 
-  registerSystem<PhysicsSystem>("Physics", 11);
-  Signature psig;
-  psig.set(ecs.getComponentType<Transform>());
-  psig.set(ecs.getComponentType<RigidBody>());
-  ecs.setSystemSignature<PhysicsSystem>(psig);
-
-  registerSystem<RenderSystem>("Renderable", 20, "render");
-  Signature rsig;
-  rsig.set(ecs.getComponentType<Renderable>());
-  ecs.setSystemSignature<RenderSystem>(rsig);
-
-  registerSystem<DebugDrawSystem>("Debug", 22, "render");
-  Signature tdSig;
-  tdSig.set(ecs.getComponentType<Transform>());
-  ecs.setSystemSignature<DebugDrawSystem>(tdSig);
-
-  registerSystem<CollisionSystem>("Collision", 12);
-  Signature csig;
-  csig.set(ecs.getComponentType<Transform>());
-  csig.set(ecs.getComponentType<Collider>());
-  ecs.setSystemSignature<CollisionSystem>(csig);
-
-  registerSystem<FollowCameraSystem>("Camera", 13);
-  Signature css;
-  css.set(ecs.getComponentType<FollowCamera>());
-  ecs.setSystemSignature<FollowCameraSystem>(css);
-
-  registerSystem<SpriteRenderSystem>("Sprite", 21, "render");
-  Signature ssig;
-  ssig.set(ecs.getComponentType<Sprite>());
-  ssig.set(ecs.getComponentType<Transform>());
-  ecs.setSystemSignature<SpriteRenderSystem>(ssig);
-
-  registerSystem<SpriteAnimationSystem>("Animation", 10);
-  Signature animSig;
-  animSig.set(ecs.getComponentType<Sprite>());
-  animSig.set(ecs.getComponentType<SpriteAnimator>());
-  ecs.setSystemSignature<SpriteAnimationSystem>(animSig);
-
-  _provider.service.texture->addTexture("test", "assets/char_spritesheet.png");
-  SDL_Texture* test = _provider.service.texture->getTexture("test");
-
-  player = ecs.createEntity();
-  ecs.addComponent(player, Transform{ { 0.0f, 100.0f } });
-  ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
-  ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
-  ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
-  ecs.addComponent(player, Sprite{ .texture = test, .srcRect = { 16, 16, 16, 16 }, .scale = 5.0f });
-  ecs.addComponent(player, PlatformerCharacter{});
+  player = _ecs.createEntity();
+  _ecs.addComponent(player, Transform{ { 0.0f, 100.0f } });
+  _ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
+  _ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
+  _ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
+  _ecs.addComponent(player, Sprite{ .name = "test", .srcRect = { 16, 16, 16, 16 }, .scale = 5.0f });
+  _ecs.addComponent(player, PlatformerCharacter{});
 
   SpriteAnimator animator;
   animator.animations["idle"] = Animation(
@@ -130,41 +76,123 @@ World::init()
       150);
 
   animator.currentAnim = "idle";
-  ecs.addComponent(player, animator);
-  ecs.addComponent(player, Identification{ "Player", "Player" });
+  _ecs.addComponent(player, animator);
+  _ecs.addComponent(player, Identification{ "Player", "Player" });
 
   // Ground
-  Entity ground = ecs.createEntity();
-  ecs.addComponent(ground, Transform{ { 0.0f, 500.0f } });
-  ecs.addComponent(ground, Collider{ { 1600.0f, 16.0f }, { 0.0f, 0.0f }, true });
-  ecs.addComponent(ground, Renderable{ { 1600.0f, 16.0f }, { 0, 255, 255, 255 } });
+  Entity ground = _ecs.createEntity();
+  _ecs.addComponent(ground, Transform{ { 0.0f, 500.0f } });
+  _ecs.addComponent(ground, Collider{ { 1600.0f, 16.0f }, { 0.0f, 0.0f }, true });
+  _ecs.addComponent(ground, Renderable{ { 1600.0f, 16.0f }, { 0, 255, 255, 255 } });
 
   // Moving platform
-  movingPlatform = ecs.createEntity();
-  ecs.addComponent(movingPlatform, Transform{ { 0.0f, 400.0f } });
-  ecs.addComponent(movingPlatform, Collider{ { 100.0f, 16.0f }, { 0.0f, 0.0f }, true });
-  ecs.addComponent(movingPlatform, Renderable{ { 100.0f, 16.0f }, { 255, 128, 0, 255 } });
-  ecs.addComponent(movingPlatform, Identification{ "MovingPlatform", "Test" });
-  ecs.addComponent(movingPlatform, MovingPlatform{});
+  movingPlatform = _ecs.createEntity();
+  _ecs.addComponent(movingPlatform, Transform{ { 0.0f, 400.0f } });
+  _ecs.addComponent(movingPlatform, Collider{ { 100.0f, 16.0f }, { 0.0f, 0.0f }, true });
+  _ecs.addComponent(movingPlatform, Renderable{ { 100.0f, 16.0f }, { 255, 128, 0, 255 } });
+  _ecs.addComponent(movingPlatform, Identification{ "MovingPlatform", "Test" });
+  _ecs.addComponent(movingPlatform, MovingPlatform{});
 
   return true;
 }
 
 void
-World::render()
+World::registerMainSystems()
 {
-  for (auto& system : _systems)
-    if (system.enabled && system.phase == "render")
-      system.func(ecs, _provider);
+
+  platformerSystem = _ecs.registerSystem<PlatformerCharacterSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<RigidBody>());
+    sig.set(_ecs.getComponentType<PlatformerCharacter>());
+    _ecs.setSystemSignature<PlatformerCharacterSystem>(sig);
+  }
+
+  movingPlatformSystem = _ecs.registerSystem<MovingPlatformSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<Transform>());
+    sig.set(_ecs.getComponentType<MovingPlatform>());
+    _ecs.setSystemSignature<MovingPlatformSystem>(sig);
+  }
+
+  physicsSystem = _ecs.registerSystem<PhysicsSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<Transform>());
+    sig.set(_ecs.getComponentType<RigidBody>());
+    _ecs.setSystemSignature<PhysicsSystem>(sig);
+  }
+
+  renderSystem = _ecs.registerSystem<RenderSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<Renderable>());
+    sig.set(_ecs.getComponentType<Transform>());
+    _ecs.setSystemSignature<RenderSystem>(sig);
+  }
+
+  debugDrawSystem = _ecs.registerSystem<DebugDrawSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<Transform>());
+    _ecs.setSystemSignature<DebugDrawSystem>(sig);
+  }
+
+  collisionSystem = _ecs.registerSystem<CollisionSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<Transform>());
+    sig.set(_ecs.getComponentType<Collider>());
+    _ecs.setSystemSignature<CollisionSystem>(sig);
+  }
+
+  cameraSystem = _ecs.registerSystem<FollowCameraSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<FollowCamera>());
+    sig.set(_ecs.getComponentType<Transform>());
+    _ecs.setSystemSignature<FollowCameraSystem>(sig);
+  }
+
+  spriteRenderSystem = _ecs.registerSystem<SpriteSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<Sprite>());
+    sig.set(_ecs.getComponentType<Transform>());
+    _ecs.setSystemSignature<SpriteSystem>(sig);
+  }
+
+  spriteAnimationSystem = _ecs.registerSystem<AnimationSystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<Sprite>());
+    sig.set(_ecs.getComponentType<SpriteAnimator>());
+    _ecs.setSystemSignature<AnimationSystem>(sig);
+  }
 }
 
 void
 World::update()
 {
-  float dt = _ctx.timer->getDeltaTime();
-  _globalScript->update(dt);
+  platformerSystem->update(_ecs, _provider);
+  movingPlatformSystem->update(_ecs, _provider);
 
-  for (auto& system : _systems)
-    if (system.enabled && system.phase == "update")
-      system.func(ecs, _provider);
+  physicsSystem->update(_ecs, _provider);
+  collisionSystem->update(_ecs, _provider);
+  spriteAnimationSystem->update(_ecs, _provider);
+  cameraSystem->update(_ecs, _provider);
+
+  if (_globalScript)
+    _globalScript->update(_ctx.timer->getDeltaTime());
+}
+
+void
+World::render()
+{
+  spriteRenderSystem->update(_ecs, _provider);
+  renderSystem->update(_ecs, _provider);
+
+  if (isDebug)
+    debugDrawSystem->update(_ecs, _provider);
 }

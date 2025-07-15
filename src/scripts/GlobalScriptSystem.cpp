@@ -1,14 +1,30 @@
 #include "GlobalScriptSystem.hpp"
-#include "Log.hpp"
+#include "LuaBindings.hpp"
+#include "Overseer.hpp"
 
-GlobalScriptSystem::GlobalScriptSystem(sol::state& lua, const std::string& scriptpath)
-    : _lua(lua), _scriptPath(scriptpath)
+GlobalScriptSystem::GlobalScriptSystem()
 {
-  sol::load_result script = _lua.load_file(_scriptPath);
+  _lua.open_libraries(sol::lib::base, sol::lib::math, sol::lib::string);
+}
+
+void
+GlobalScriptSystem::bind(Overseer& ecs)
+{
+  _ecs = &ecs;
+
+  LuaBindings::bindVector2D(_lua);
+  LuaBindings::bindTransform(_lua, *_ecs);
+  LuaBindings::bindFollowCamera(_lua, *_ecs);
+}
+
+void
+GlobalScriptSystem::loadScript(const std::string& path)
+{
+  sol::load_result script = _lua.load_file(path);
   if (!script.valid())
   {
     sol::error err = script;
-    LOG_ERROR("[GlobalScriptSystem] ", err.what());
+    LOG_ERROR("[GlobalScriptSystem] Failed to load '", path, "': ", err.what());
     return;
   }
 

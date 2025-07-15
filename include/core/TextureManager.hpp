@@ -13,15 +13,23 @@ public:
   SDL_Texture* loadTexture(const std::string& path);
   SDL_Texture* getTexture(const std::string& id);
 
-  void addTexture(const std::string& id, const std::string& path);
+  bool addTexture(const std::string& id, const std::string& path);
   void drawTexture(SDL_Texture* texture);
   void drawTexture(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dest);
   void drawTexture(SDL_Texture*     texture,
                    SDL_Rect*        src,
                    SDL_Rect*        dest,
                    SDL_RendererFlip flip = SDL_FLIP_NONE);
+  void drawTexture(SDL_Texture*     texture,
+                   SDL_Rect*        src,
+                   SDL_Rect*        dest,
+                   float            rotation,
+                   SDL_Point*       center = nullptr,
+                   SDL_RendererFlip flip   = SDL_FLIP_NONE);
   bool hasTexture(const std::string& id) const;
   void unloadTexture(const std::string& id);
+
+  bool renameTexture(const std::string& oldID, const std::string& newID);
 
   const std::unordered_map<std::string, SDL_Texture*>& getAllTextures() { return _textures; }
 

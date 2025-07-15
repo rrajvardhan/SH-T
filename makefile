@@ -7,9 +7,11 @@ RESET  := \033[0m
 
 # === Project Configuration ===
 CXX := g++
-BIN := main
+BUILD_DIR := build
+BIN := $(BUILD_DIR)/main
+ASSETS_DST := $(BUILD_DIR)/assets
 SRC_DIR := src
-OBJ_DIR := obj
+OBJ_DIR := $(BUILD_DIR)/obj
 INC_DIR := include
 
 # === Compilation Flags ===
@@ -46,7 +48,7 @@ SRC_FILES := $(shell find $(SRC_DIR) -name "*.cpp") main.cpp
 OBJ_FILES := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
 
 # === Default Target ===
-all: $(BIN)
+all: $(BIN) copy_assets
 	@echo -e "$(GREEN)[✓] Build complete.$(RESET)"
 
 # === Link Objects to Binary ===
@@ -54,20 +56,26 @@ $(BIN): $(OBJ_FILES)
 	@echo -e "$(YELLOW)[INFO] Linking objects...$(RESET)"
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
+
 # === Compile .cpp to .o, preserving folder structure ===
 $(OBJ_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@echo -e "$(PURPLE)[DEBUG] Compiling $<$(RESET)"
 	$(CXX) $(CFLAGS) -c $< -o $@
 
-# === Run the Program ===
+# === Copy Assets to Build Folder ===
+copy_assets:
+	@mkdir -p $(ASSETS_DST)
+	@echo -e "$(YELLOW)[INFO] Copied assets to build folder.$(RESET)"
+
 run: $(BIN)
-	@echo -e "$(YELLOW)[INFO] Launching binary...$(RESET)"
-	./$(BIN)
+	@echo -e "$(YELLOW)[INFO] Launching binary from build dir...$(RESET)"
+	cd $(BUILD_DIR) && ./main
 
 # === Clean Build Files ===
 clean:
 	@echo -e "$(RED)[CLEAN] Removed binaries and object files.$(RESET)"
-	@rm -rf $(OBJ_DIR) $(BIN)
+	@rm -rf $(OBJ_DIR)
+	@rm $(BUILD_DIR)/main 
 
-.PHONY: all clean run
+.PHONY: all clean run copy_assets

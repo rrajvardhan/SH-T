@@ -74,26 +74,18 @@ TextureManager::getTexture(const std::string& id)
   return it->second;
 }
 
-void
+bool
 TextureManager::addTexture(const std::string& id, const std::string& path)
 {
 
-  char* basePath = SDL_GetBasePath();
-  if (!basePath)
-  {
-    LOG_ERROR("Failed to get base path: ", SDL_GetError());
-    return;
-  }
-
-  std::string fullpath = std::string(basePath) + path;
-  SDL_free(basePath);
+  std::string fullpath = path;
 
   SDL_Texture* tex = loadTexture(fullpath);
   if (tex == nullptr)
   {
 
     LOG_ERROR("[TextureManager] Failed to load texture: ", fullpath);
-    return;
+    return false;
   }
 
   auto [it, inserted] = _textures.insert_or_assign(id, tex);
@@ -103,6 +95,26 @@ TextureManager::addTexture(const std::string& id, const std::string& path)
   }
 
   LOG_SUCCESS("[TextureManager] Texture added with ID: ", id);
+  return true;
+}
+
+bool
+TextureManager::renameTexture(const std::string& oldID, const std::string& newID)
+{
+  auto it = _textures.find(oldID);
+  if (it != _textures.end() && !_textures.count(newID))
+  {
+    _textures[newID] = it->second;
+    _textures.erase(it);
+    LOG_SUCCESS("[TextureManager] Renamed texture: ", oldID, " -> ", newID);
+  }
+  else
+  {
+    LOG_ERROR("[TextureManager] Rename failed: ", oldID, " -> ", newID);
+    return false;
+  }
+
+  return true;
 }
 
 void
@@ -141,6 +153,23 @@ TextureManager::drawTexture(SDL_Texture*     texture,
   }
 
   SDL_RenderCopyEx(_renderer, texture, src, dest, 0.0f, nullptr, flip);
+}
+
+void
+TextureManager::drawTexture(SDL_Texture*     texture,
+                            SDL_Rect*        src,
+                            SDL_Rect*        dest,
+                            float            rotation,
+                            SDL_Point*       center,
+                            SDL_RendererFlip flip)
+{
+  if (texture == nullptr)
+  {
+    LOG_ERROR("[TextureManager] Tried to draw null texture.");
+    return;
+  }
+
+  SDL_RenderCopyEx(_renderer, texture, src, dest, rotation, center, flip);
 }
 
 bool
