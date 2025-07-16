@@ -28,8 +28,8 @@ Application::init(EngineConfig& cfg)
     return false;
   }
 
-  _world->getProvider().camera.setViewport(_ctx.graphics->getScreenWidth(),
-                                           _ctx.graphics->getScreenHeight());
+  _world->getCamera().setViewport(_ctx.graphics->getScreenWidth(),
+                                  _ctx.graphics->getScreenHeight());
 
   _editor = new Editor(*_world, _ctx);
 
@@ -85,7 +85,7 @@ Application::pollEvents()
         _cfg.renderer.height = _height;
 
         _ctx.graphics->onResize(_width, _height);
-        _world->getProvider().camera.setViewport(_width, _height);
+        _world->getCamera().setViewport(_width, _height);
       }
       break;
     }

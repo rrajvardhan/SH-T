@@ -15,7 +15,7 @@ renderComponentInspector(Entity& selected, World& world);
 void
 renderControls(bool& active);
 void
-renderResources(ServiceContext& ctx);
+renderResources(ServiceContext& ctx, World& world);
 void
 renderEntityPanel(World& world);
 }

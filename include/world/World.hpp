@@ -27,9 +27,11 @@ public:
   void update();
   void render();
 
-  WorldProvider& getProvider() { return _provider; }
-  Overseer&      getECS() { return _ecs; }
-  Camera2D&      getCamera() { return _camera; }
+  WorldProvider&      getProvider() { return _provider; }
+  Overseer&           getECS() { return _ecs; }
+  Camera2D&           getCamera() { return _camera; }
+  EventBus&           getEventBus() { return _eventbus; }
+  GlobalScriptSystem& getScriptSystem() { return *_globalScript; }
 
   bool isDebug = false;
 
@@ -44,13 +46,12 @@ private:
   std::unique_ptr<GlobalScriptSystem> _globalScript;
 
   // Main Systems
-  std::shared_ptr<PlatformerCharacterSystem> platformerSystem;
-  std::shared_ptr<MovingPlatformSystem>      movingPlatformSystem;
-  std::shared_ptr<PhysicsSystem>             physicsSystem;
-  std::shared_ptr<RenderSystem>              renderSystem;
-  std::shared_ptr<DebugDrawSystem>           debugDrawSystem;
-  std::shared_ptr<CollisionSystem>           collisionSystem;
-  std::shared_ptr<FollowCameraSystem>        cameraSystem;
-  std::shared_ptr<SpriteSystem>              spriteRenderSystem;
-  std::shared_ptr<AnimationSystem>           spriteAnimationSystem;
+  std::shared_ptr<MovingPlatformSystem> movingPlatformSystem;
+  std::shared_ptr<PhysicsSystem>        physicsSystem;
+  std::shared_ptr<RenderSystem>         renderSystem;
+  std::shared_ptr<DebugDrawSystem>      debugDrawSystem;
+  std::shared_ptr<CollisionSystem>      collisionSystem;
+  std::shared_ptr<FollowCameraSystem>   cameraSystem;
+  std::shared_ptr<SpriteSystem>         spriteRenderSystem;
+  std::shared_ptr<AnimationSystem>      spriteAnimationSystem;
 };

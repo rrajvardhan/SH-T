@@ -5,6 +5,7 @@
 #include "Collision.hpp"
 #include "CollisionComponents.hpp"
 #include "DebugDraw.hpp"
+#include "LuaBindings.hpp"
 #include "MovingPlatform.hpp"
 #include "Objects.hpp"
 #include "Overseer.hpp"
@@ -50,7 +51,19 @@ World::init()
 
   _globalScript = std::make_unique<GlobalScriptSystem>();
   _globalScript->bind(_ecs);
-  _globalScript->loadScript("assets/scripts/main.lua");
+
+  auto& lua = _globalScript->getLuaState();
+
+  LuaBindings::bindVector2D(lua);
+  LuaBindings::bindTransform(lua, _ecs);
+  LuaBindings::bindFollowCamera(lua, _ecs);
+  LuaBindings::bindCollider(lua, _ecs);
+  LuaBindings::bindRigidBody(lua, _ecs);
+
+  LuaBindings::bindKeyConstants(lua);
+  LuaBindings::bindInput(lua, *_provider.service.input);
+
+  _globalScript->loadScript("scripts/main.lua");
 
   //////////////////////////////////////////////////////////////////
   _provider.service.texture->addTexture("test", "assets/textures/char_spritesheet.png");
@@ -61,7 +74,6 @@ World::init()
   _ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
   _ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
   _ecs.addComponent(player, Sprite{ .name = "test", .srcRect = { 16, 16, 16, 16 }, .scale = 5.0f });
-  _ecs.addComponent(player, PlatformerCharacter{});
 
   SpriteAnimator animator;
   animator.animations["idle"] = Animation(
@@ -99,15 +111,6 @@ World::init()
 void
 World::registerMainSystems()
 {
-
-  platformerSystem = _ecs.registerSystem<PlatformerCharacterSystem>();
-  {
-    Signature sig;
-    sig.set(_ecs.getComponentType<RigidBody>());
-    sig.set(_ecs.getComponentType<PlatformerCharacter>());
-    _ecs.setSystemSignature<PlatformerCharacterSystem>(sig);
-  }
-
   movingPlatformSystem = _ecs.registerSystem<MovingPlatformSystem>();
   {
     Signature sig;
@@ -175,7 +178,6 @@ World::registerMainSystems()
 void
 World::update()
 {
-  platformerSystem->update(_ecs, _provider);
   movingPlatformSystem->update(_ecs, _provider);
 
   physicsSystem->update(_ecs, _provider);

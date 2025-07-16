@@ -1,4 +1,5 @@
 #include "Editor.hpp"
+#include "LuaBindings.hpp"
 #include "Panels.hpp"
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
@@ -18,7 +19,7 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
 
   io.FontGlobalScale = 1.0f;
   io.Fonts->Clear();
-  ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 20.0f);
+  ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 28.0f);
   if (!customFont)
   {
     LOG_ERROR("[ImGui] Failed to load JetBrains Mono font!");
@@ -145,7 +146,7 @@ Editor::render()
   Panels::renderGamePanel(_active, _ctx, _world);
   Panels::renderEntityPanel(_world);
   Panels::renderControls(_active);
-  Panels::renderResources(_ctx);
+  Panels::renderResources(_ctx, _world);
 
   if (_showImguiEditor)
   {

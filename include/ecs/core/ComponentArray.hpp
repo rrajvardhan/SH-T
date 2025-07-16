@@ -36,6 +36,7 @@ public:
     if (_entityToIndex.find(entity) == _entityToIndex.end())
     {
       LOG_DEBUG("[ComponentArray] Removing non-existent component.");
+      return;
     }
 
     size_t removedEntityIndex = _entityToIndex[entity];
@@ -52,6 +53,7 @@ public:
 
     _size--;
   }
+
   void destroyEntity(Entity entity) override
   {
 

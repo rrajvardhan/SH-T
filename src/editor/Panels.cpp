@@ -1,8 +1,10 @@
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
+#include "Log.hpp"
 #include "Panels.hpp"
 #include "PhysicsComponents.hpp"
 #include "RenderableComponents.hpp"
+#include "ScriptBrowser.hpp"
 #include "ServiceContext.hpp"
 #include "SpriteComponents.hpp"
 #include "TextureBrowser.hpp"
@@ -11,8 +13,25 @@
 #include "World.hpp"
 #include "imgui.h"
 #include <SDL2/SDL_render.h>
+#include <fstream>
 #include <string>
 #include <vector>
+
+std::string
+loadFileToString(const std::string& path)
+{
+  std::ifstream     in(path);
+  std::stringstream ss;
+  ss << in.rdbuf();
+  return ss.str();
+}
+
+void
+saveStringToFile(const std::string& path, const std::string& content)
+{
+  std::ofstream out(path);
+  out << content;
+}
 
 namespace Panels
 {
@@ -71,7 +90,7 @@ renderGamePanel(bool& active, ServiceContext& ctx, World& world)
     active = true;
   }
 
-  if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
+  if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && active)
   {
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll != 0.0f)
@@ -92,8 +111,8 @@ renderGamePanel(bool& active, ServiceContext& ctx, World& world)
         ImVec2 delta = ImVec2(ImGui::GetIO().MousePos.x - lastMouse.x,
                               ImGui::GetIO().MousePos.y - lastMouse.y);
 
-        auto pos = world.getProvider().camera.getPosition();
-        world.getProvider().camera.setPosition(pos - Vector2D(delta.x, delta.y));
+        auto pos = world.getCamera().getPosition();
+        world.getCamera().setPosition(pos - Vector2D(delta.x, delta.y));
         lastMouse = ImGui::GetIO().MousePos;
       }
     }
@@ -125,7 +144,7 @@ renderGamePanel(bool& active, ServiceContext& ctx, World& world)
   SDL_SetRenderTarget(ctx.graphics->getRenderer(), gameTexture);
   ctx.graphics->clear();
 
-  world.getProvider().camera.setViewport(newW, newH);
+  world.getCamera().setViewport(newW, newH);
   world.render();
 
   currentZoom = currentZoom + (targetZoom - currentZoom) * 0.1f;
@@ -458,13 +477,13 @@ renderControls(bool& active)
 }
 
 void
-renderResources(ServiceContext& ctx)
+renderResources(ServiceContext& ctx, World& world)
 {
-  ImGui::Begin("TEXTURES");
 
   static TextureAssetBrowser textureBrowser(ctx.texture, "assets/textures");
   textureBrowser.draw();
 
-  ImGui::End();
+  static ScriptBrowser scriptBrowser("scripts", world.getScriptSystem());
+  scriptBrowser.draw();
 }
 }

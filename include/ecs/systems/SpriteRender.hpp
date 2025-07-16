@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Log.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
 #include "Provider.hpp"

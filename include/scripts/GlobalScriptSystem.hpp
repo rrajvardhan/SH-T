@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Overseer.hpp"
+#include "sol/state.hpp"
 #include <sol/sol.hpp>
 
 class GlobalScriptSystem
@@ -11,6 +12,10 @@ public:
 
   void bind(Overseer& ecs);
   void loadScript(const std::string& path);
+
+  void reload();
+
+  sol::state& getLuaState() { return _lua; }
 
 private:
   sol::state    _lua;

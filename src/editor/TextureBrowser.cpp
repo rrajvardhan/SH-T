@@ -63,10 +63,14 @@ TextureAssetBrowser::draw()
     _loaded = true;
   }
 
+  ImGui::Begin("TEXTURES");
+
   if (ImGui::Button("+ Add Texture"))
   {
     ImGuiFileDialog::Instance()->OpenDialog("ChooseTex", "Choose Texture", ".png");
   }
+
+  ImGui::Separator();
 
   if (ImGuiFileDialog::Instance()->Display("ChooseTex"))
   {
@@ -171,4 +175,5 @@ TextureAssetBrowser::draw()
   }
 
   ImGui::Columns(1);
+  ImGui::End();
 }
