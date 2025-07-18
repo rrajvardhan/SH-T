@@ -26,17 +26,22 @@
 
 #include <sol/object.hpp>
 
-namespace sol::utility {
+namespace sol::utility
+{
 
-	// Returns true if the object is represented by an integer,
-	// not a floating point number or any other type.
-	inline bool is_integer(const sol::object& object) {
-		auto pp = stack::push_pop(object);
-		return lua_isinteger(object.lua_state(), -1);
-	}
-	inline bool is_integer(const sol::stack_object& object) {
-		return lua_isinteger(object.lua_state(), object.stack_index());
-	}
+// Returns true if the object is represented by an integer,
+// not a floating point number or any other type.
+inline bool
+is_integer(const sol::object& object)
+{
+  auto pp = stack::push_pop(object);
+  return lua_isinteger(object.lua_state(), -1);
+}
+inline bool
+is_integer(const sol::stack_object& object)
+{
+  return lua_isinteger(object.lua_state(), object.stack_index());
+}
 
 } // namespace sol::utility
 

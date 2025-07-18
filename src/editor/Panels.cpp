@@ -1,7 +1,6 @@
+#include "Panels.hpp"
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
-#include "Log.hpp"
-#include "Panels.hpp"
 #include "PhysicsComponents.hpp"
 #include "RenderableComponents.hpp"
 #include "ScriptBrowser.hpp"
@@ -13,25 +12,8 @@
 #include "World.hpp"
 #include "imgui.h"
 #include <SDL2/SDL_render.h>
-#include <fstream>
 #include <string>
 #include <vector>
-
-std::string
-loadFileToString(const std::string& path)
-{
-  std::ifstream     in(path);
-  std::stringstream ss;
-  ss << in.rdbuf();
-  return ss.str();
-}
-
-void
-saveStringToFile(const std::string& path, const std::string& content)
-{
-  std::ofstream out(path);
-  out << content;
-}
 
 namespace Panels
 {
@@ -52,8 +34,8 @@ renderDockspace(World& world)
                   | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove
                   | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-  ImGui::Begin("SH!T DockSpace", nullptr, window_flags);
-  ImGuiID dockspace_id = ImGui::GetID("SHITDockspace");
+  ImGui::Begin("DockSpace", nullptr, window_flags);
+  ImGuiID dockspace_id = ImGui::GetID("Dockspace");
   ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 
   if (ImGui::BeginMenuBar())
@@ -171,8 +153,7 @@ renderEntityPanel(World& world)
   if (ImGui::Button("+ Add Entity"))
   {
     Entity newEntity = ecs.createEntity();
-    ecs.addComponent<Identification>(newEntity,
-                                     { "Entity | " + std::to_string((Entity) newEntity) });
+    ecs.addComponent(newEntity, Transform{});
   }
 
   ImGui::SeparatorText("Scene Entities");
@@ -361,7 +342,7 @@ renderEntityPanel(World& world)
       {
         auto& sprite = ecs.getComponent<Sprite>(entity);
 
-        if (ImGui::CollapsingHeader("Sprite"))
+        if (ImGui::CollapsingHeader("Sprite", header))
         {
           static char   nameBuffer[128] = "";
           static Entity lastEntity      = INVALID_ENTITY;

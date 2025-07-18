@@ -20,7 +20,7 @@ public:
     }
 
     _componentTypes[typeId]  = _nextComponentType;
-    _componentArrays[typeId] = std::make_shared<ComponentArray<T> >();
+    _componentArrays[typeId] = std::make_shared<ComponentArray<T>>();
 
     ++_nextComponentType;
   }
@@ -71,12 +71,12 @@ public:
   }
 
 private:
-  std::unordered_map<std::type_index, ComponentType>                     _componentTypes{};
-  std::unordered_map<std::type_index, std::shared_ptr<IComponentArray> > _componentArrays{};
-  ComponentType                                                          _nextComponentType{};
+  std::unordered_map<std::type_index, ComponentType>                    _componentTypes{};
+  std::unordered_map<std::type_index, std::shared_ptr<IComponentArray>> _componentArrays{};
+  ComponentType                                                         _nextComponentType{};
 
   template <typename T>
-  std::shared_ptr<ComponentArray<T> > getComponentArray()
+  std::shared_ptr<ComponentArray<T>> getComponentArray()
   {
     std::type_index typeId = std::type_index(typeid(T));
 
@@ -85,6 +85,6 @@ private:
       LOG_DEBUG("[ComponentManager] Component not registered before use.");
     }
 
-    return std::static_pointer_cast<ComponentArray<T> >(_componentArrays[typeId]);
+    return std::static_pointer_cast<ComponentArray<T>>(_componentArrays[typeId]);
   }
 };

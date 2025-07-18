@@ -1,7 +1,7 @@
+#include "LuaBindings.hpp"
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
 #include "InputManager.hpp"
-#include "LuaBindings.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
 #include "Types.hpp"

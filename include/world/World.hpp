@@ -3,7 +3,6 @@
 #include "Animation.hpp"
 #include "Camera.hpp"
 #include "Camera2D.hpp"
-#include "Character.hpp"
 #include "Collision.hpp"
 #include "DebugDraw.hpp"
 #include "EventBus.hpp"

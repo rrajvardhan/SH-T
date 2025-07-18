@@ -28,7 +28,7 @@ struct AnimationFrame
 struct Animation
 {
   std::vector<AnimationFrame> frames;
-  int                         speed = 100; // ms per frame
+  int                         speed = 100;
 
   Animation() = default;
   Animation(std::vector<AnimationFrame> af, int s) : frames(af), speed(s) {}

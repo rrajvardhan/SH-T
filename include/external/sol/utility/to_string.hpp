@@ -30,29 +30,34 @@
 #include <cstddef>
 #include <string>
 
-namespace sol::utility {
+namespace sol::utility
+{
 
-	// Converts any object into a string using luaL_tolstring.
-	//
-	// Note: Uses the metamethod __tostring if available.
-	inline std::string to_string(const sol::stack_object& object) {
-		std::size_t len;
-		const char* str = luaL_tolstring(object.lua_state(), object.stack_index(), &len);
+// Converts any object into a string using luaL_tolstring.
+//
+// Note: Uses the metamethod __tostring if available.
+inline std::string
+to_string(const sol::stack_object& object)
+{
+  std::size_t len;
+  const char* str = luaL_tolstring(object.lua_state(), object.stack_index(), &len);
 
-		auto result = std::string(str, len);
+  auto result = std::string(str, len);
 
-		// luaL_tolstring pushes the string onto the stack, but since
-		// we have copied it into our std::string by now we should
-		// remove it from the stack.
-		lua_pop(object.lua_state(), 1);
+  // luaL_tolstring pushes the string onto the stack, but since
+  // we have copied it into our std::string by now we should
+  // remove it from the stack.
+  lua_pop(object.lua_state(), 1);
 
-		return result;
-	}
+  return result;
+}
 
-	inline std::string to_string(const sol::object& object) {
-		auto pp = sol::stack::push_pop(object);
-		return to_string(sol::stack_object(object.lua_state(), -1));
-	}
+inline std::string
+to_string(const sol::object& object)
+{
+  auto pp = sol::stack::push_pop(object);
+  return to_string(sol::stack_object(object.lua_state(), -1));
+}
 
 } // namespace sol::utility
 

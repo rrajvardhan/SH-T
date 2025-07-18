@@ -1,10 +1,11 @@
+#include "World.hpp"
 #include "Animation.hpp"
 #include "Camera.hpp"
 #include "CameraComponents.hpp"
-#include "Character.hpp"
 #include "Collision.hpp"
 #include "CollisionComponents.hpp"
 #include "DebugDraw.hpp"
+#include "GlobalScriptSystem.hpp"
 #include "LuaBindings.hpp"
 #include "MovingPlatform.hpp"
 #include "Objects.hpp"
@@ -17,7 +18,7 @@
 #include "SpriteRender.hpp"
 #include "Types.hpp"
 #include "UtilComponents.hpp"
-#include "World.hpp"
+#include <string>
 
 World::World(ServiceContext& ctx) : _camera(), _ctx(ctx), _provider(ctx, _camera, _eventbus)
 {
@@ -65,31 +66,34 @@ World::init()
 
   _globalScript->loadScript("scripts/main.lua");
 
+  _eventbus.subscribe(_globalScript.get(), &GlobalScriptSystem::onAnyEvent);
+
   //////////////////////////////////////////////////////////////////
-  _provider.service.texture->addTexture("test", "assets/textures/char_spritesheet.png");
 
   player = _ecs.createEntity();
   _ecs.addComponent(player, Transform{ { 0.0f, 100.0f } });
   _ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
   _ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
   _ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
-  _ecs.addComponent(player, Sprite{ .name = "test", .srcRect = { 16, 16, 16, 16 }, .scale = 5.0f });
+  _ecs.addComponent(player, Sprite{ .name = "bird", .srcRect = { 0, 16, 16, 16 }, .scale = 5.0f });
 
   SpriteAnimator animator;
   animator.animations["idle"] = Animation(
       {
-          { { 16 * 1, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 2, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 3, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 4, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 5, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 6, 16 * 1, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 0, 16, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 1, 16, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 2, 16, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 3, 16, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 4, 16, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 5, 16, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 6, 16, 16, 16 }, { 0.0f, 0.0f } },
+          { { 16 * 7, 16, 16, 16 }, { 0.0f, 0.0f } },
       },
       150);
 
   animator.currentAnim = "idle";
   _ecs.addComponent(player, animator);
-  _ecs.addComponent(player, Identification{ "Player", "Player" });
+  _ecs.addComponent(player, Identification{ "bird", "bird" });
 
   // Ground
   Entity ground = _ecs.createEntity();
@@ -102,7 +106,7 @@ World::init()
   _ecs.addComponent(movingPlatform, Transform{ { 0.0f, 400.0f } });
   _ecs.addComponent(movingPlatform, Collider{ { 100.0f, 16.0f }, { 0.0f, 0.0f }, true });
   _ecs.addComponent(movingPlatform, Renderable{ { 100.0f, 16.0f }, { 255, 128, 0, 255 } });
-  _ecs.addComponent(movingPlatform, Identification{ "MovingPlatform", "Test" });
+  _ecs.addComponent(movingPlatform, Identification{ "MovingPlatform" });
   _ecs.addComponent(movingPlatform, MovingPlatform{});
 
   return true;

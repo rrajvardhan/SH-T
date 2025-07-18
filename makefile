@@ -28,6 +28,7 @@ CFLAGS := -g -Wall -Wextra -std=c++17 \
 	-I$(INC_DIR)/scripts \
 	-I$(INC_DIR)/editor \
 	-I$(INC_DIR)/world \
+	-I$(INC_DIR)/serializers \
   -I$(INC_DIR)/external \
   -I$(INC_DIR)/external/imgui \
   -I$(INC_DIR)/external/imgui/backends \

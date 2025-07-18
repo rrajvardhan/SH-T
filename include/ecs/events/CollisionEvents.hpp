@@ -8,5 +8,7 @@ struct CollisionEvent : public Event
   Entity a;
   Entity b;
 
-  CollisionEvent(Entity a_, Entity b_) : a(a_), b(b_) {}
+  CollisionEvent(Entity a, Entity b) : a(a), b(b) {}
+
+  std::string to_string() const override { return "CollisionEvent"; }
 };

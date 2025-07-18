@@ -24,40 +24,59 @@
 #ifndef SOL_DEBUG_HPP
 #define SOL_DEBUG_HPP
 
-#include <sol/stack.hpp>
 #include <iostream>
+#include <sol/stack.hpp>
 
-namespace sol { namespace detail { namespace debug {
-	inline std::string dump_types(lua_State* L) {
-		std::string visual;
-		std::size_t size = lua_gettop(L) + 1;
-		for (std::size_t i = 1; i < size; ++i) {
-			if (i != 1) {
-				visual += " | ";
-			}
-			visual += type_name(L, stack::get<type>(L, static_cast<int>(i)));
-		}
-		return visual;
-	}
+namespace sol
+{
+namespace detail
+{
+namespace debug
+{
+inline std::string
+dump_types(lua_State* L)
+{
+  std::string visual;
+  std::size_t size = lua_gettop(L) + 1;
+  for (std::size_t i = 1; i < size; ++i)
+  {
+    if (i != 1)
+    {
+      visual += " | ";
+    }
+    visual += type_name(L, stack::get<type>(L, static_cast<int>(i)));
+  }
+  return visual;
+}
 
-	inline void print_stack(lua_State* L) {
-		std::cout << dump_types(L) << std::endl;
-	}
+inline void
+print_stack(lua_State* L)
+{
+  std::cout << dump_types(L) << std::endl;
+}
 
-	inline void print_section(const std::string& message, lua_State* L) {
-		std::cout << "-- " << message << " -- [ " << dump_types(L) << " ]" << std::endl;
-	}
+inline void
+print_section(const std::string& message, lua_State* L)
+{
+  std::cout << "-- " << message << " -- [ " << dump_types(L) << " ]" << std::endl;
+}
 
-	inline void print_lua_information(lua_State* L) {
-		std::cout << "Lua Version: " << SOL_USE(SOL_LUA_VERSION) << std::endl;
-		std::cout << "Lua (C++): " << SOL_IS_ON(SOL_USING_CXX_LUA) << std::endl;
-		std::cout << "Trampoline Propagate Exceptions?: " << SOL_IS_ON(SOL_PROPAGATE_EXCEPTIONS) << std::endl;
-		std::cout << "Catch-all Exceptions?: " << SOL_IS_ON(SOL_EXCEPTIONS_CATCH_ALL) << std::endl;
-		std::cout << "LuaJIT: " << SOL_IS_ON(SOL_USE_LUAJIT) << std::endl;
-		std::cout << "LuaJIT Version: " << SOL_USE(SOL_LUAJIT_VERSION) << std::endl;
-		std::cout << "LuaJIT (C++): " << SOL_IS_ON(SOL_USING_CXX_LUAJIT) << std::endl;
-		std::cout << "LuaJIT Exception Trampoline: " << SOL_IS_ON(SOL_USE_LUAJIT_EXCEPTION_TRAMPOLINE) << std::endl;
-	}
-}}} // namespace sol::detail::debug
+inline void
+print_lua_information(lua_State* L)
+{
+  std::cout << "Lua Version: " << SOL_USE(SOL_LUA_VERSION) << std::endl;
+  std::cout << "Lua (C++): " << SOL_IS_ON(SOL_USING_CXX_LUA) << std::endl;
+  std::cout << "Trampoline Propagate Exceptions?: " << SOL_IS_ON(SOL_PROPAGATE_EXCEPTIONS)
+            << std::endl;
+  std::cout << "Catch-all Exceptions?: " << SOL_IS_ON(SOL_EXCEPTIONS_CATCH_ALL) << std::endl;
+  std::cout << "LuaJIT: " << SOL_IS_ON(SOL_USE_LUAJIT) << std::endl;
+  std::cout << "LuaJIT Version: " << SOL_USE(SOL_LUAJIT_VERSION) << std::endl;
+  std::cout << "LuaJIT (C++): " << SOL_IS_ON(SOL_USING_CXX_LUAJIT) << std::endl;
+  std::cout << "LuaJIT Exception Trampoline: " << SOL_IS_ON(SOL_USE_LUAJIT_EXCEPTION_TRAMPOLINE)
+            << std::endl;
+}
+}
+}
+} // namespace sol::detail::debug
 
 #endif // SOL_DEBUG_HPP

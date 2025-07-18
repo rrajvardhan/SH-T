@@ -24,70 +24,78 @@
 #ifndef SOL_TUPLE_HPP
 #define SOL_TUPLE_HPP
 
-#include <sol/forward.hpp>
 #include <sol/base_traits.hpp>
+#include <sol/forward.hpp>
 
-#include <tuple>
 #include <cstddef>
+#include <tuple>
 
-namespace sol {
-	namespace detail {
-		using swallow = std::initializer_list<int>;
-	} // namespace detail
+namespace sol
+{
+namespace detail
+{
+using swallow = std::initializer_list<int>;
+} // namespace detail
 
-	namespace meta {
-		template <typename T>
-		using is_tuple = is_specialization_of<T, std::tuple>;
+namespace meta
+{
+template <typename T>
+using is_tuple = is_specialization_of<T, std::tuple>;
 
-		template <typename T>
-		constexpr inline bool is_tuple_v = is_tuple<T>::value;
+template <typename T>
+constexpr inline bool is_tuple_v = is_tuple<T>::value;
 
-		namespace detail {
-			template <typename... Args>
-			struct tuple_types_ {
-				typedef types<Args...> type;
-			};
+namespace detail
+{
+template <typename... Args>
+struct tuple_types_
+{
+  typedef types<Args...> type;
+};
 
-			template <typename... Args>
-			struct tuple_types_<std::tuple<Args...>> {
-				typedef types<Args...> type;
-			};
-		} // namespace detail
+template <typename... Args>
+struct tuple_types_<std::tuple<Args...>>
+{
+  typedef types<Args...> type;
+};
+} // namespace detail
 
-		template <typename... Args>
-		using tuple_types = typename detail::tuple_types_<Args...>::type;
+template <typename... Args>
+using tuple_types = typename detail::tuple_types_<Args...>::type;
 
-		template <typename Arg>
-		struct pop_front_type;
+template <typename Arg>
+struct pop_front_type;
 
-		template <typename Arg>
-		using pop_front_type_t = typename pop_front_type<Arg>::type;
+template <typename Arg>
+using pop_front_type_t = typename pop_front_type<Arg>::type;
 
-		template <typename... Args>
-		struct pop_front_type<types<Args...>> {
-			typedef void front_type;
-			typedef types<Args...> type;
-		};
+template <typename... Args>
+struct pop_front_type<types<Args...>>
+{
+  typedef void           front_type;
+  typedef types<Args...> type;
+};
 
-		template <typename Arg, typename... Args>
-		struct pop_front_type<types<Arg, Args...>> {
-			typedef Arg front_type;
-			typedef types<Args...> type;
-		};
+template <typename Arg, typename... Args>
+struct pop_front_type<types<Arg, Args...>>
+{
+  typedef Arg            front_type;
+  typedef types<Args...> type;
+};
 
-		template <std::size_t N, typename Tuple>
-		using tuple_element = std::tuple_element<N, std::remove_reference_t<Tuple>>;
+template <std::size_t N, typename Tuple>
+using tuple_element = std::tuple_element<N, std::remove_reference_t<Tuple>>;
 
-		template <std::size_t N, typename Tuple>
-		using tuple_element_t = std::tuple_element_t<N, std::remove_reference_t<Tuple>>;
+template <std::size_t N, typename Tuple>
+using tuple_element_t = std::tuple_element_t<N, std::remove_reference_t<Tuple>>;
 
-		template <std::size_t N, typename Tuple>
-		using unqualified_tuple_element = unqualified<tuple_element_t<N, Tuple>>;
+template <std::size_t N, typename Tuple>
+using unqualified_tuple_element = unqualified<tuple_element_t<N, Tuple>>;
 
-		template <std::size_t N, typename Tuple>
-		using unqualified_tuple_element_t = unqualified_t<tuple_element_t<N, Tuple>>;
+template <std::size_t N, typename Tuple>
+using unqualified_tuple_element_t = unqualified_t<tuple_element_t<N, Tuple>>;
 
-	} // namespace meta
+} // namespace meta
 } // namespace sol
 
 #endif // SOL_TUPLE_HPP

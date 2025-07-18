@@ -24,15 +24,16 @@
 #ifndef SOL_PACKAGED_COROUTINE_HPP
 #define SOL_PACKAGED_COROUTINE_HPP
 
-#include <sol/reference.hpp>
-#include <sol/object.hpp>
-#include <sol/stack.hpp>
-#include <sol/function_result.hpp>
-#include <sol/thread.hpp>
-#include <sol/protected_handler.hpp>
 #include <sol/coroutine.hpp>
+#include <sol/function_result.hpp>
+#include <sol/object.hpp>
+#include <sol/protected_handler.hpp>
+#include <sol/reference.hpp>
+#include <sol/stack.hpp>
+#include <sol/thread.hpp>
 
-namespace sol {
+namespace sol
+{
 
 #if 0
 

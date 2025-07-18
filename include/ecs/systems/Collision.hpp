@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CollisionComponents.hpp"
+#include "CollisionEvents.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
 #include "Provider.hpp"
@@ -67,6 +68,8 @@ public:
         {
           resolveDynamicVsStatic(ecs, a, b);
         }
+
+        provider.eventbus.publish(new CollisionEvent(a, b));
       }
     }
   }
@@ -87,10 +90,10 @@ private:
     Vector2D dynCenter  = tD.position + cD.offset;
     Vector2D statCenter = tS.position + cS.offset;
     Vector2D delta      = dynCenter - statCenter;
-    Vector2D totalHalf  = (cD.size + cS.size) * 0.5f;
+    Vector2D half       = (cD.size + cS.size) * 0.5f;
 
-    float overlapX = totalHalf.x - std::abs(delta.x);
-    float overlapY = totalHalf.y - std::abs(delta.y);
+    float overlapX = half.x - std::abs(delta.x);
+    float overlapY = half.y - std::abs(delta.y);
 
     if (overlapX < overlapY)
     {

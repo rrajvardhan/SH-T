@@ -26,12 +26,16 @@
 
 #include <sol/stack_get_unqualified.hpp>
 
-namespace sol { namespace stack {
+namespace sol
+{
+namespace stack
+{
 
-	// There are no more enable_ifs that can be used here,
-	// so this is just for posterity, I guess?
-	// maybe I'll fill this file in later.
+// There are no more enable_ifs that can be used here,
+// so this is just for posterity, I guess?
+// maybe I'll fill this file in later.
 
-}} // namespace sol::stack
+}
+} // namespace sol::stack
 
 #endif // SOL_STACK_QUALIFIED_GET_HPP

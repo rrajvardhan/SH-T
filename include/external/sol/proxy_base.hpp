@@ -25,43 +25,61 @@
 #define SOL_PROXY_BASE_HPP
 
 #include <sol/reference.hpp>
-#include <sol/tuple.hpp>
 #include <sol/stack.hpp>
+#include <sol/tuple.hpp>
 
-namespace sol {
-	struct proxy_base_tag { };
+namespace sol
+{
+struct proxy_base_tag
+{
+};
 
-	namespace detail {
-		template <typename T>
-		using proxy_key_t = meta::conditional_t<meta::is_specialization_of_v<meta::unqualified_t<T>, std::tuple>, T,
-		     std::tuple<meta::conditional_t<std::is_array_v<meta::unqualified_t<T>>, std::remove_reference_t<T>&, meta::unqualified_t<T>>>>;
-	}
+namespace detail
+{
+template <typename T>
+using proxy_key_t
+    = meta::conditional_t<meta::is_specialization_of_v<meta::unqualified_t<T>, std::tuple>,
+                          T,
+                          std::tuple<meta::conditional_t<std::is_array_v<meta::unqualified_t<T>>,
+                                                         std::remove_reference_t<T>&,
+                                                         meta::unqualified_t<T>>>>;
+}
 
-	template <typename Super>
-	struct proxy_base : public proxy_base_tag {
-		lua_State* lua_state() const {
-			const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
-			return super.lua_state();
-		}
+template <typename Super>
+struct proxy_base : public proxy_base_tag
+{
+  lua_State* lua_state() const
+  {
+    const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
+    return super.lua_state();
+  }
 
-		operator std::string() const {
-			const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
-			return super.template get<std::string>();
-		}
+  operator std::string() const
+  {
+    const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
+    return super.template get<std::string>();
+  }
 
-		template <typename T, meta::enable<meta::neg<meta::is_string_constructible<T>>, is_proxy_primitive<meta::unqualified_t<T>>> = meta::enabler>
-		operator T() const {
-			const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
-			return super.template get<T>();
-		}
+  template <typename T,
+            meta::enable<meta::neg<meta::is_string_constructible<T>>,
+                         is_proxy_primitive<meta::unqualified_t<T>>>
+            = meta::enabler>
+  operator T() const
+  {
+    const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
+    return super.template get<T>();
+  }
 
-		template <typename T,
-		     meta::enable<meta::neg<meta::is_string_constructible<T>>, meta::neg<is_proxy_primitive<meta::unqualified_t<T>>>> = meta::enabler>
-		operator T&() const {
-			const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
-			return super.template get<T&>();
-		}
-	};
+  template <typename T,
+            meta::enable<meta::neg<meta::is_string_constructible<T>>,
+                         meta::neg<is_proxy_primitive<meta::unqualified_t<T>>>>
+            = meta::enabler>
+  operator T&() const
+  {
+    const Super& super = *static_cast<const Super*>(static_cast<const void*>(this));
+    return super.template get<T&>();
+  }
+};
 
 } // namespace sol
 

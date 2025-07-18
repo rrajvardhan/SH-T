@@ -1,5 +1,5 @@
-#include "Log.hpp"
 #include "TextureManager.hpp"
+#include "Log.hpp"
 #include <SDL2/SDL_error.h>
 #include <SDL2/SDL_filesystem.h>
 #include <SDL2/SDL_image.h>

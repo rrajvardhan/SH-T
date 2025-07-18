@@ -2,7 +2,6 @@
 
 #include "GlobalScriptSystem.hpp"
 #include "TextEditor.h"
-#include <filesystem>
 #include <imgui.h>
 #include <string>
 #include <vector>
@@ -11,13 +10,12 @@ class ScriptBrowser
 {
 public:
   ScriptBrowser(const std::string& assetDir, GlobalScriptSystem& scripts);
-
   void draw();
 
 private:
   void loadScripts();
   void copyToAssetFolder(const std::string& srcPath, const std::string& destPath);
-  void drawScriptTree(const std::filesystem::path& dir, int& id);
+  void writeScriptToFile(const std::string& path, const std::string& content);
 
   TextEditor          _textEditor;
   GlobalScriptSystem& _scripts;

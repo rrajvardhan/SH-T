@@ -12,6 +12,7 @@ CompileFlags:
     - -Iinclude/scripts
     - -Iinclude/editor
     - -Iinclude/world
+    - -Iinclude/serializers
     - -I../include
     - -I../include/core
     - -I../include/ecs
@@ -26,6 +27,7 @@ CompileFlags:
     - -I../include/scripts
     - -I../include/editor
     - -I../include/world
+    - -I../include/serializers
     - -I../ 
     - -I../core
     - -I../ecs
@@ -40,6 +42,7 @@ CompileFlags:
     - -I../scripts
     - -I../world
     - -I../editor
+    - -I../serializers
     - -I../../
     - -I../../core
     - -I../../ecs
@@ -68,3 +71,4 @@ CompileFlags:
     - -I../../include/scripts
     - -I../../include/editor
     - -I../../include/world
+    - -I../../include/serializers

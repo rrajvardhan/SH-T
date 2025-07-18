@@ -2,7 +2,6 @@
 
 #include "Camera2D.hpp"
 #include "InputManager.hpp"
-#include "World.hpp"
 #include "sol/state.hpp"
 #include <sol/sol.hpp>
 

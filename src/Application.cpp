@@ -2,6 +2,7 @@
 #include "Log.hpp"
 #include "ServiceContext.hpp"
 #include "World.hpp"
+#include <SDL2/SDL_scancode.h>
 
 bool
 Application::init()

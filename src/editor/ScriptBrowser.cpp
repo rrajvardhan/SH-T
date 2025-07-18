@@ -1,5 +1,5 @@
-#include "ImGuiFileDialog.h"
 #include "ScriptBrowser.hpp"
+#include "ImGuiFileDialog.h"
 #include "imgui.h"
 #include <filesystem>
 #include <fstream>
@@ -20,12 +20,12 @@ trimTrailingNewlines(const std::string& text)
 {
   size_t end = text.find_last_not_of("\n\r");
   if (end == std::string::npos)
-    return ""; // only newlines
+    return "";
   return text.substr(0, end + 1);
 }
 
 void
-writeScriptToFile(const std::string& path, const std::string& content)
+ScriptBrowser::writeScriptToFile(const std::string& path, const std::string& content)
 {
   std::ofstream out(path, std::ios::trunc);
   if (!out)
@@ -75,7 +75,7 @@ ScriptBrowser::draw()
   float scriptListWidth = 300.0f;
   ImGui::BeginChild("ScriptList", ImVec2(scriptListWidth, 0), true);
 
-  if (ImGui::Button("+ Add Script"))
+  if (ImGui::Button("Import"))
     ImGuiFileDialog::Instance()->OpenDialog("ChooseLua", "Choose Lua File", ".lua");
 
   if (ImGuiFileDialog::Instance()->Display("ChooseLua"))
@@ -90,9 +90,37 @@ ScriptBrowser::draw()
     }
     ImGuiFileDialog::Instance()->Close();
   }
+  ImGui::SameLine();
+  if (ImGui::Button("+"))
+  {
+    ImGui::OpenPopup("NewScriptPopup");
+  }
+  if (ImGui::BeginPopup("NewScriptPopup"))
+  {
+    static char newScriptName[128] = "new_script.lua";
+    ImGui::InputText("##ScriptName", newScriptName, sizeof(newScriptName));
+    if (ImGui::Button("Create"))
+    {
+      std::string newPath = _assetDir + "/" + newScriptName;
+      if (!std::filesystem::exists(newPath))
+      {
+        std::ofstream file(newPath);
+        file << "-- " << newScriptName << "\n\n";
+        file.close();
+
+        _loaded = false;
+      }
+
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Cancel"))
+      ImGui::CloseCurrentPopup();
+    ImGui::EndPopup();
+  }
 
   ImGui::Separator();
-
   for (int i = 0; i < (int) _scriptIDs.size(); ++i)
   {
     ImGui::PushID(i);
@@ -135,11 +163,9 @@ ScriptBrowser::draw()
   }
 
   ImGui::EndChild();
-
   ImGui::SameLine();
 
   ImGui::BeginChild("ScriptEditor", ImVec2(0, 0), true);
-
   if (!_selectedScript.empty())
   {
     const std::string filename = _assetDir + "/" + _selectedScript;
@@ -172,8 +198,18 @@ ScriptBrowser::draw()
 void
 ScriptBrowser::copyToAssetFolder(const std::string& srcPath, const std::string& destPath)
 {
+  if (!std::filesystem::exists(srcPath))
+  {
+    return;
+  }
   std::filesystem::create_directories(std::filesystem::path(destPath).parent_path());
   std::ifstream src(srcPath, std::ios::binary);
   std::ofstream dst(destPath, std::ios::binary);
+
+  if (!src || !dst)
+  {
+    return;
+  }
+
   dst << src.rdbuf();
 }

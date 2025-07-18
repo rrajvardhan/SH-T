@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Overseer.hpp"
 #include "ServiceContext.hpp"
 #include "Types.hpp"
 #include "World.hpp"

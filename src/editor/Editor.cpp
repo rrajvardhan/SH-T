@@ -1,5 +1,7 @@
 #include "Editor.hpp"
-#include "LuaBindings.hpp"
+#include "CameraComponents.hpp"
+#include "ComponentSerializer.hpp"
+#include "JsonSerializer.hpp"
 #include "Panels.hpp"
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
@@ -19,10 +21,10 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
 
   io.FontGlobalScale = 1.0f;
   io.Fonts->Clear();
-  ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 28.0f);
+  ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 20.0f);
   if (!customFont)
   {
-    LOG_ERROR("[ImGui] Failed to load JetBrains Mono font!");
+    LOG_ERROR("[Editor] Failed to load default font!");
   }
 
   ImGui::StyleColorsClassic();
@@ -143,10 +145,49 @@ Editor::render()
 
   Panels::renderDockspace(_world);
 
-  Panels::renderGamePanel(_active, _ctx, _world);
-  Panels::renderEntityPanel(_world);
   Panels::renderControls(_active);
+  Panels::renderEntityPanel(_world);
   Panels::renderResources(_ctx, _world);
+  Panels::renderGamePanel(_active, _ctx, _world);
+
+  if (ImGui::Begin("Editor Controls"))
+  {
+    if (ImGui::Button("Save Test Scene"))
+    {
+      auto& ecs = _world.getECS();
+
+      JSONSerializer serializer;
+      serializer.StartNewObject("Scene");
+
+      for (Entity entity : ecs.getEntities())
+      {
+        serializer.StartNewObject(std::to_string(entity));
+
+        if (ecs.hasComponent<Transform>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<Transform>(entity));
+        if (ecs.hasComponent<RigidBody>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<RigidBody>(entity));
+        if (ecs.hasComponent<Force>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<Force>(entity));
+        if (ecs.hasComponent<Collider>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<Collider>(entity));
+        if (ecs.hasComponent<FollowCamera>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<FollowCamera>(entity));
+        if (ecs.hasComponent<Sprite>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<Sprite>(entity));
+        if (ecs.hasComponent<Renderable>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<Renderable>(entity));
+        if (ecs.hasComponent<Identification>(entity))
+          ComponentSerializer::Serialize(serializer, ecs.getComponent<Identification>(entity));
+
+        serializer.EndObject();
+      }
+
+      serializer.EndObject();
+      serializer.saveToFile("test.json");
+    }
+    ImGui::End();
+  }
 
   if (_showImguiEditor)
   {
