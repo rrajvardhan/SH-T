@@ -29,37 +29,28 @@
 #include <sol/forward.hpp>
 #include <sol/traits.hpp>
 
-namespace sol
-{
-namespace detail
-{
-const bool default_safe_function_calls =
+namespace sol {
+	namespace detail {
+		const bool default_safe_function_calls =
 #if SOL_IS_ON(SOL_SAFE_FUNCTION_CALLS)
-    true;
+		     true;
 #else
-    false;
+		     false;
 #endif
-} // namespace detail
+	} // namespace detail
 
-namespace meta
-{
-namespace meta_detail
-{
-}
-} // namespace meta::meta_detail
 
-namespace stack
-{
-namespace stack_detail
-{
-using undefined_method_func = void (*)(stack_reference);
+	namespace meta { namespace meta_detail {
+	}} // namespace meta::meta_detail
 
-template <typename T>
-void set_undefined_methods_on(stack_reference);
+	namespace stack { namespace stack_detail {
+		using undefined_method_func = void (*)(stack_reference);
 
-struct undefined_metatable;
-}
-} // namespace stack::stack_detail
+		template <typename T>
+		void set_undefined_methods_on(stack_reference);
+
+		struct undefined_metatable;
+	}} // namespace stack::stack_detail
 } // namespace sol
 
 #endif // SOL_FORWARD_DETAIL_HPP

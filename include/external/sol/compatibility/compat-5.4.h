@@ -2,17 +2,16 @@
 #define NOT_KEPLER_PROJECT_COMPAT54_H_
 
 #if defined(__cplusplus) && !defined(COMPAT53_LUA_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 #if __has_include(<lua/lua.h>)
-#include <lua/lauxlib.h>
-#include <lua/lua.h>
-#include <lua/lualib.h>
+  #include <lua/lua.h>
+  #include <lua/lauxlib.h>
+  #include <lua/lualib.h>
 #else
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
+  #include <lua.h>
+  #include <lauxlib.h>
+  #include <lualib.h>
 #endif
 #if defined(__cplusplus) && !defined(COMPAT53_LUA_CPP)
 }
@@ -24,7 +23,7 @@ extern "C"
 /* So Lua 5.4 actually removes this, which breaks sol2...
  man, this API is quite unstable...!
 */
-#define LUA_ERRGCMM (LUA_ERRERR + 2)
+#  define LUA_ERRGCMM (LUA_ERRERR + 2)
 #endif /* LUA_ERRGCMM define */
 
 #endif // Lua 5.4 only

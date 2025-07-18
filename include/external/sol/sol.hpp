@@ -45,25 +45,25 @@
 #pragma warning(disable : 4505) // unreferenced local function has been removed GEE THANKS
 #endif                          // clang++ vs. g++ vs. VC++
 
-#include <sol/as_args.hpp>
-#include <sol/assert.hpp>
-#include <sol/bytecode.hpp>
-#include <sol/coroutine.hpp>
 #include <sol/forward.hpp>
 #include <sol/forward_detail.hpp>
-#include <sol/function.hpp>
-#include <sol/lua_value.hpp>
-#include <sol/metatable.hpp>
-#include <sol/object.hpp>
-#include <sol/protected_function.hpp>
+#include <sol/assert.hpp>
+#include <sol/bytecode.hpp>
 #include <sol/stack.hpp>
-#include <sol/state.hpp>
+#include <sol/object.hpp>
+#include <sol/function.hpp>
+#include <sol/protected_function.hpp>
+#include <sol/usertype.hpp>
 #include <sol/table.hpp>
+#include <sol/state.hpp>
+#include <sol/coroutine.hpp>
 #include <sol/thread.hpp>
 #include <sol/userdata.hpp>
-#include <sol/usertype.hpp>
+#include <sol/metatable.hpp>
+#include <sol/as_args.hpp>
 #include <sol/variadic_args.hpp>
 #include <sol/variadic_results.hpp>
+#include <sol/lua_value.hpp>
 
 #if SOL_IS_ON(SOL_COMPILER_GCC)
 #pragma GCC diagnostic pop

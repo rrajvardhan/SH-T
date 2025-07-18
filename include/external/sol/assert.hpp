@@ -30,17 +30,16 @@
 
 #if SOL_IS_ON(SOL2_CI)
 
-struct pre_main
-{
-  pre_main()
-  {
+struct pre_main {
+	pre_main() {
 #ifdef _MSC_VER
-    _set_abort_behavior(0, _WRITE_ABORT_MSG);
+		_set_abort_behavior(0, _WRITE_ABORT_MSG);
 #endif
-  }
+	}
 } inline sol2_ci_dont_lock_ci_please = {};
 
 #endif // Prevent lockup when doing Continuous Integration
+
 
 // clang-format off
 
