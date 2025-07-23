@@ -1,7 +1,9 @@
 #pragma once
 
+#include "AudioManager.hpp"
 #include "Camera2D.hpp"
 #include "InputManager.hpp"
+#include "Timer.hpp"
 #include "sol/state.hpp"
 #include <sol/sol.hpp>
 
@@ -38,4 +40,10 @@ bindKeyConstants(sol::state& lua);
 
 void
 bindInput(sol::state& lua, InputManager& input);
+
+void
+bindTimer(sol::state& lua, Timer& timer);
+
+void
+bindAudio(sol::state& lua, AudioManager& audio);
 }

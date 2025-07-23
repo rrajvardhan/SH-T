@@ -5,6 +5,7 @@
 
 AudioManager::AudioManager()
 {
+  SDL_LogSetOutputFunction([](void*, int, SDL_LogPriority, const char*) {}, nullptr);
   if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
   {
     LOG_ERROR("[AudioManager] Failed to initialize SDL_mixer: ", Mix_GetError());
@@ -35,6 +36,29 @@ AudioManager::~AudioManager()
     Mix_CloseAudio();
     Mix_Quit();
     LOG_INFO("[AudioManager] SDL_mixer shut down.");
+  }
+}
+
+void
+AudioManager::renameAudio(const std::string& oldID, const std::string& newID, bool isMusic)
+{
+  if (isMusic)
+  {
+    auto it = _music.find(oldID);
+    if (it != _music.end())
+    {
+      _music[newID] = it->second;
+      _music.erase(it);
+    }
+  }
+  else
+  {
+    auto it = _sfx.find(oldID);
+    if (it != _sfx.end())
+    {
+      _sfx[newID] = it->second;
+      _sfx.erase(it);
+    }
   }
 }
 

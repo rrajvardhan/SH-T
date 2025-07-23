@@ -57,7 +57,6 @@ public:
       auto tex = provider.service.texture->getTexture(sprite.name);
 
       provider.service.graphics->setTextureBlendMode(tex, sprite.blendMode);
-
       provider.service.texture->drawTexture(
           tex, &sprite.srcRect, &dest, transform.rotation, nullptr, sprite.flip);
     }

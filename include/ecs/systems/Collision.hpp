@@ -14,23 +14,6 @@ struct AABB
   Vector2D max;
 };
 
-inline AABB
-getAABB(const Transform& transform, const Collider& collider)
-{
-  Vector2D halfSize = collider.size * 0.5f;
-  Vector2D center   = transform.position + collider.offset;
-  return {
-    center - halfSize, // min
-    center + halfSize  // max
-  };
-}
-
-inline bool
-checkAABBOverlap(const AABB& a, const AABB& b)
-{
-  return !(a.max.x < b.min.x || a.min.x > b.max.x || a.max.y < b.min.y || a.min.y > b.max.y);
-}
-
 class CollisionSystem : public System
 {
 public:
@@ -75,6 +58,21 @@ public:
   }
 
 private:
+  AABB getAABB(const Transform& transform, const Collider& collider)
+  {
+    Vector2D halfSize = collider.size * 0.5f;
+    Vector2D center   = transform.position + collider.offset;
+    return {
+      center - halfSize, // min
+      center + halfSize  // max
+    };
+  }
+
+  bool checkAABBOverlap(const AABB& a, const AABB& b)
+  {
+    return !(a.max.x < b.min.x || a.min.x > b.max.x || a.max.y < b.min.y || a.min.y > b.max.y);
+  }
+
   void resolveDynamicVsStatic(Overseer& ecs, Entity a, Entity b)
   {
     Entity dyn  = ecs.getComponent<Collider>(a).isStatic ? b : a;

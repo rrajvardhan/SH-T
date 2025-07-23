@@ -1,5 +1,5 @@
-#include "ComponentSerializer.hpp"
 #include "CameraComponents.hpp"
+#include "ComponentSerializer.hpp"
 #include "JsonSerializer.hpp"
 #include "RenderableComponents.hpp"
 
@@ -52,10 +52,7 @@ Serialize(JSONSerializer& s, const Collider& c)
 void
 Serialize(JSONSerializer& s, const FollowCamera& cam)
 {
-  s.StartNewObject("FollowCamera")
-      .AddKeyValuePair("target", cam.target)
-      .AddKeyValuePair("active", cam.isActive)
-      .EndObject();
+  s.StartNewObject("FollowCamera").AddKeyValuePair("active", cam.isActive).EndObject();
 }
 
 void
@@ -150,7 +147,6 @@ Deserialize(const JSON& j, Collider& c)
 void
 Deserialize(const JSON& j, FollowCamera& cam)
 {
-  cam.target   = j["target"];
   cam.isActive = j["active"];
 }
 
@@ -185,7 +181,7 @@ Deserialize(const JSON& j, Sprite& s)
   s.srcRect.w = j["Rect"]["w"];
   s.srcRect.h = j["Rect"]["h"];
   s.scale     = j["scale"];
-  s.flip      = static_cast<SDL_RendererFlip>(j["flip"]);
+  s.flip      = j["flip"];
   s.offset.x  = j["offset"]["x"];
   s.offset.y  = j["offset"]["y"];
   s.layer     = j["layer"];

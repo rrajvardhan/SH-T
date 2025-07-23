@@ -1,12 +1,12 @@
-#include "Panels.hpp"
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
+#include "ComponentSerializer.hpp"
+#include "Editor.hpp"
+#include "JsonSerializer.hpp"
 #include "PhysicsComponents.hpp"
 #include "RenderableComponents.hpp"
-#include "ScriptBrowser.hpp"
 #include "ServiceContext.hpp"
 #include "SpriteComponents.hpp"
-#include "TextureBrowser.hpp"
 #include "Types.hpp"
 #include "UtilComponents.hpp"
 #include "World.hpp"
@@ -15,11 +15,8 @@
 #include <string>
 #include <vector>
 
-namespace Panels
-{
-
 void
-renderDockspace(World& world)
+Editor::renderDockspace()
 {
 
   static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -43,7 +40,7 @@ renderDockspace(World& world)
     if (ImGui::BeginMenu("Debug"))
     {
 
-      ImGui::Checkbox("DebugDraw System##enabled", &world.isDebug);
+      ImGui::Checkbox("DebugDraw System##enabled", &_world.isDebug);
       ImGui::EndMenu();
     }
     ImGui::EndMenuBar();
@@ -53,7 +50,7 @@ renderDockspace(World& world)
 }
 
 void
-renderGamePanel(bool& active, ServiceContext& ctx, World& world)
+Editor::renderGamePanel()
 {
 
   static float currentZoom = 1.0f;
@@ -62,17 +59,17 @@ renderGamePanel(bool& active, ServiceContext& ctx, World& world)
   static bool   dragging = false;
   static ImVec2 lastMouse;
 
-  std::string label = active ? "Game (Edit Mode)" : "Game";
+  std::string label = _active ? "Scene (Edit Mode)" : "Scene";
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
   ImGui::Begin(label.c_str());
 
   if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)
       && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
   {
-    active = true;
+    _active = true;
   }
 
-  if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && active)
+  if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) && _active)
   {
     float scroll = ImGui::GetIO().MouseWheel;
     if (scroll != 0.0f)
@@ -93,8 +90,8 @@ renderGamePanel(bool& active, ServiceContext& ctx, World& world)
         ImVec2 delta = ImVec2(ImGui::GetIO().MousePos.x - lastMouse.x,
                               ImGui::GetIO().MousePos.y - lastMouse.y);
 
-        auto pos = world.getCamera().getPosition();
-        world.getCamera().setPosition(pos - Vector2D(delta.x, delta.y));
+        auto pos = _world.getCamera().getPosition();
+        _world.getCamera().setPosition(pos - Vector2D(delta.x, delta.y));
         lastMouse = ImGui::GetIO().MousePos;
       }
     }
@@ -116,23 +113,23 @@ renderGamePanel(bool& active, ServiceContext& ctx, World& world)
       SDL_DestroyTexture(gameTexture);
     texW        = newW;
     texH        = newH;
-    gameTexture = SDL_CreateTexture(ctx.graphics->getRenderer(),
+    gameTexture = SDL_CreateTexture(_ctx.graphics->getRenderer(),
                                     SDL_PIXELFORMAT_RGBA8888,
                                     SDL_TEXTUREACCESS_TARGET,
                                     texW,
                                     texH);
   }
 
-  SDL_SetRenderTarget(ctx.graphics->getRenderer(), gameTexture);
-  ctx.graphics->clear();
+  SDL_SetRenderTarget(_ctx.graphics->getRenderer(), gameTexture);
+  _ctx.graphics->clear();
 
-  world.getCamera().setViewport(newW, newH);
-  world.render();
+  _world.getCamera().setViewport(newW, newH);
+  _world.render();
 
   currentZoom = currentZoom + (targetZoom - currentZoom) * 0.1f;
-  world.getCamera().setZoom(currentZoom);
+  _world.getCamera().setZoom(currentZoom);
 
-  SDL_SetRenderTarget(ctx.graphics->getRenderer(), nullptr);
+  SDL_SetRenderTarget(_ctx.graphics->getRenderer(), nullptr);
   if (gameTexture)
     ImGui::Image((ImTextureID) gameTexture, gamePanelSize);
 
@@ -141,29 +138,31 @@ renderGamePanel(bool& active, ServiceContext& ctx, World& world)
 }
 
 void
-renderEntityPanel(World& world)
+Editor::renderEntityPanel()
 {
 
   static std::vector<Entity> destroyQueue;
 
-  auto& ecs = world.getECS();
+  auto& _ecs = _world.getECS();
   ImGui::Begin("Entities");
 
   // === Entity Creation ===
   if (ImGui::Button("+ Add Entity"))
   {
-    Entity newEntity = ecs.createEntity();
-    ecs.addComponent(newEntity, Transform{});
+    Entity newEntity = _ecs.createEntity();
+    _ecs.addComponent(newEntity, Transform{});
   }
 
   ImGui::SeparatorText("Scene Entities");
 
   // === Entity List ===
-  for (Entity entity : ecs.getEntities())
+  for (Entity entity : _ecs.getEntities())
   {
     std::string label = "Entity | " + std::to_string((uint32_t) entity);
-    if (ecs.hasComponent<Identification>(entity))
-      label = ecs.getComponent<Identification>(entity).name;
+    if (_ecs.hasComponent<Identification>(entity))
+      label = _ecs.getComponent<Identification>(entity).name + " | "
+              + std::to_string((uint32_t) entity);
+    ;
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_FramePadding;
 
@@ -192,12 +191,12 @@ renderEntityPanel(World& world)
     if (open)
     {
       // === Component Editors ===
-      if (ecs.hasComponent<Identification>(entity))
+      if (_ecs.hasComponent<Identification>(entity))
       {
 
         if (ImGui::CollapsingHeader("Identification", header))
         {
-          auto& i = ecs.getComponent<Identification>(entity);
+          auto& i = _ecs.getComponent<Identification>(entity);
           char  nameBuffer[128];
           strncpy(nameBuffer, i.name.c_str(), sizeof(nameBuffer));
           nameBuffer[sizeof(nameBuffer) - 1] = '\0';
@@ -208,23 +207,33 @@ renderEntityPanel(World& world)
             if (ImGui::IsItemDeactivatedAfterEdit())
               i.name = std::string(nameBuffer);
           }
+          char gnameBuffer[128];
+          strncpy(gnameBuffer, i.group.c_str(), sizeof(gnameBuffer));
+          gnameBuffer[sizeof(gnameBuffer) - 1] = '\0';
+
+          if (ImGui::InputText(
+                  "Group", gnameBuffer, sizeof(gnameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+          {
+            if (ImGui::IsItemDeactivatedAfterEdit())
+              i.group = std::string(gnameBuffer);
+          }
 
           ImGui::NewLine();
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##Identification" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<Identification>(entity);
+            _ecs.removeComponent<Identification>(entity);
           }
 
           ImGui::Separator();
         }
       }
 
-      if (ecs.hasComponent<Transform>(entity))
+      if (_ecs.hasComponent<Transform>(entity))
       {
         if (ImGui::CollapsingHeader("Transform", header))
         {
-          auto& t = ecs.getComponent<Transform>(entity);
+          auto& t = _ecs.getComponent<Transform>(entity);
           ImGui::DragFloat2("Position", &t.position.x, 1.0f);
           ImGui::DragFloat("Rotation", &t.rotation, 1.0f);
 
@@ -232,17 +241,17 @@ renderEntityPanel(World& world)
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##Transform" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<Transform>(entity);
+            _ecs.removeComponent<Transform>(entity);
           }
           ImGui::Separator();
         }
       }
 
-      if (ecs.hasComponent<RigidBody>(entity))
+      if (_ecs.hasComponent<RigidBody>(entity))
       {
         if (ImGui::CollapsingHeader("RigidBody", header))
         {
-          auto& rb = ecs.getComponent<RigidBody>(entity);
+          auto& rb = _ecs.getComponent<RigidBody>(entity);
           ImGui::DragFloat("Mass", &rb.mass, 1.0f);
           ImGui::DragFloat2("Velocity", &rb.velocity.x, 1.0f);
 
@@ -250,34 +259,34 @@ renderEntityPanel(World& world)
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##RigidBody" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<RigidBody>(entity);
+            _ecs.removeComponent<RigidBody>(entity);
           }
           ImGui::Separator();
         }
       }
 
-      if (ecs.hasComponent<Force>(entity))
+      if (_ecs.hasComponent<Force>(entity))
       {
         if (ImGui::CollapsingHeader("Force", header))
         {
-          auto& f = ecs.getComponent<Force>(entity);
+          auto& f = _ecs.getComponent<Force>(entity);
           ImGui::DragFloat2("Force", &f.vector.x, 1.0f);
 
           ImGui::NewLine();
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##Force" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<Force>(entity);
+            _ecs.removeComponent<Force>(entity);
           }
           ImGui::Separator();
         }
       }
 
-      if (ecs.hasComponent<Collider>(entity))
+      if (_ecs.hasComponent<Collider>(entity))
       {
         if (ImGui::CollapsingHeader("Collider", header))
         {
-          auto& c = ecs.getComponent<Collider>(entity);
+          auto& c = _ecs.getComponent<Collider>(entity);
           ImGui::Checkbox("Static", &c.isStatic);
           ImGui::DragFloat2("Size##Collider", &c.size.x, 1.0f);
           ImGui::DragFloat2("Offset##Collider", &c.offset.x, 1.0f);
@@ -286,17 +295,17 @@ renderEntityPanel(World& world)
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##Collider" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<Collider>(entity);
+            _ecs.removeComponent<Collider>(entity);
           }
           ImGui::Separator();
         }
       }
 
-      if (ecs.hasComponent<Renderable>(entity))
+      if (_ecs.hasComponent<Renderable>(entity))
       {
         if (ImGui::CollapsingHeader("Renderable", header))
         {
-          auto& r = ecs.getComponent<Renderable>(entity);
+          auto& r = _ecs.getComponent<Renderable>(entity);
           ImGui::DragFloat2("Size##Renderable", &r.size.x, 1.0f);
           float color[4]
               = { r.color.r / 255.0f, r.color.g / 255.0f, r.color.b / 255.0f, r.color.a / 255.0f };
@@ -312,35 +321,31 @@ renderEntityPanel(World& world)
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##Renderable" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<Renderable>(entity);
+            _ecs.removeComponent<Renderable>(entity);
           }
           ImGui::Separator();
         }
       }
 
-      if (ecs.hasComponent<FollowCamera>(entity))
+      if (_ecs.hasComponent<FollowCamera>(entity))
       {
         if (ImGui::CollapsingHeader("FollowCamera", header))
         {
-          auto& cam = ecs.getComponent<FollowCamera>(entity);
-          ImGui::Checkbox("Active", &cam.isActive);
-          int tmp = static_cast<int>(cam.target);
-          if (ImGui::InputInt("Target", &tmp))
-            cam.target = static_cast<Entity>(tmp);
-
+          auto& cam = _ecs.getComponent<FollowCamera>(entity);
+          ImGui::Checkbox("_active", &cam.isActive);
           ImGui::NewLine();
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##FollowCamera" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<FollowCamera>(entity);
+            _ecs.removeComponent<FollowCamera>(entity);
           }
           ImGui::Separator();
         }
       }
 
-      if (ecs.hasComponent<Sprite>(entity))
+      if (_ecs.hasComponent<Sprite>(entity))
       {
-        auto& sprite = ecs.getComponent<Sprite>(entity);
+        auto& sprite = _ecs.getComponent<Sprite>(entity);
 
         if (ImGui::CollapsingHeader("Sprite", header))
         {
@@ -366,21 +371,41 @@ renderEntityPanel(World& world)
           ImGui::DragFloat2("Offset##Sprite", &sprite.offset.x);
           ImGui::InputInt("Layer", &sprite.layer);
 
-          const char* flipLabels[] = { "None", "Horizontal", "Vertical" };
-          int         flipMode     = (int) sprite.flip;
-          if (ImGui::Combo("Flip", &flipMode, flipLabels, IM_ARRAYSIZE(flipLabels)))
-            sprite.flip = (SDL_RendererFlip) flipMode;
+          const char* flipLabels[] = { "none", "horizontal", "vertical" };
+          int         flipIndex    = 0;
+          if (sprite.flip == "none")
+            flipIndex = 0;
+          else if (sprite.flip == "horizontal")
+            flipIndex = 1;
+          else if (sprite.flip == "vertical")
+            flipIndex = 2;
 
-          const char* blendLabels[] = { "None", "Blend", "Add", "Mod" };
-          int         blendIndex    = (int) sprite.blendMode;
+          if (ImGui::Combo("Flip", &flipIndex, flipLabels, IM_ARRAYSIZE(flipLabels)))
+          {
+            sprite.flip = flipLabels[flipIndex];
+          }
+
+          const char* blendLabels[] = { "none", "blend", "add", "mod" };
+          int         blendIndex    = 0;
+          if (sprite.blendMode == "none")
+            blendIndex = 0;
+          else if (sprite.blendMode == "blend")
+            blendIndex = 1;
+          else if (sprite.blendMode == "add")
+            blendIndex = 2;
+          else if (sprite.blendMode == "mod")
+            blendIndex = 3;
+
           if (ImGui::Combo("Blend Mode", &blendIndex, blendLabels, IM_ARRAYSIZE(blendLabels)))
-            sprite.blendMode = (SDL_BlendMode) blendIndex;
+          {
+            sprite.blendMode = blendLabels[blendIndex];
+          }
 
           ImGui::NewLine();
           ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
           if (ImGui::SmallButton(("Remove##Sprite" + std::to_string(entity)).c_str()))
           {
-            ecs.removeComponent<Sprite>(entity);
+            _ecs.removeComponent<Sprite>(entity);
           }
           ImGui::Separator();
         }
@@ -392,29 +417,29 @@ renderEntityPanel(World& world)
 
       if (ImGui::BeginPopup(("AddComponentPopup" + std::to_string(entity)).c_str()))
       {
-        if (!ecs.hasComponent<Identification>(entity) && ImGui::MenuItem("Identification"))
-          ecs.addComponent<Identification>(entity, {});
+        if (!_ecs.hasComponent<Identification>(entity) && ImGui::MenuItem("Identification"))
+          _ecs.addComponent<Identification>(entity, {});
 
-        if (!ecs.hasComponent<Transform>(entity) && ImGui::MenuItem("Transform"))
-          ecs.addComponent<Transform>(entity, {});
+        if (!_ecs.hasComponent<Transform>(entity) && ImGui::MenuItem("Transform"))
+          _ecs.addComponent<Transform>(entity, {});
 
-        if (!ecs.hasComponent<RigidBody>(entity) && ImGui::MenuItem("RigidBody"))
-          ecs.addComponent<RigidBody>(entity, {});
+        if (!_ecs.hasComponent<RigidBody>(entity) && ImGui::MenuItem("RigidBody"))
+          _ecs.addComponent<RigidBody>(entity, {});
 
-        if (!ecs.hasComponent<Collider>(entity) && ImGui::MenuItem("Collider"))
-          ecs.addComponent<Collider>(entity, {});
+        if (!_ecs.hasComponent<Collider>(entity) && ImGui::MenuItem("Collider"))
+          _ecs.addComponent<Collider>(entity, {});
 
-        if (!ecs.hasComponent<Force>(entity) && ImGui::MenuItem("Force"))
-          ecs.addComponent<Force>(entity, {});
+        if (!_ecs.hasComponent<Force>(entity) && ImGui::MenuItem("Force"))
+          _ecs.addComponent<Force>(entity, {});
 
-        if (!ecs.hasComponent<Renderable>(entity) && ImGui::MenuItem("Renderable"))
-          ecs.addComponent<Renderable>(entity, {});
+        if (!_ecs.hasComponent<Renderable>(entity) && ImGui::MenuItem("Renderable"))
+          _ecs.addComponent<Renderable>(entity, {});
 
-        if (!ecs.hasComponent<FollowCamera>(entity) && ImGui::MenuItem("FollowCamera"))
-          ecs.addComponent<FollowCamera>(entity, {});
+        if (!_ecs.hasComponent<FollowCamera>(entity) && ImGui::MenuItem("FollowCamera"))
+          _ecs.addComponent<FollowCamera>(entity, {});
 
-        if (!ecs.hasComponent<Sprite>(entity) && ImGui::MenuItem("Sprite"))
-          ecs.addComponent<Sprite>(entity, {});
+        if (!_ecs.hasComponent<Sprite>(entity) && ImGui::MenuItem("Sprite"))
+          _ecs.addComponent<Sprite>(entity, {});
 
         ImGui::EndPopup();
       }
@@ -427,24 +452,24 @@ renderEntityPanel(World& world)
   ImGui::End();
 
   for (Entity e : destroyQueue)
-    ecs.destroyEntity(e);
+    _ecs.destroyEntity(e);
   destroyQueue.clear();
 }
 
 void
-renderControls(bool& active)
+Editor::renderControls()
 {
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
   ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 0.0f));
 
-  ImGui::Begin("Toolbar",
+  ImGui::Begin("##Toolbar",
                nullptr,
                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse
                    | ImGuiWindowFlags_AlwaysAutoResize);
 
-  if (ImGui::Button(active ? "Play " : "Pause"))
+  if (ImGui::Button(_active ? "Play " : "Pause"))
   {
-    active = !active;
+    _active = !_active;
   }
 
   ImGui::SameLine();
@@ -453,18 +478,74 @@ renderControls(bool& active)
   {
   }
 
+  ImGui::SameLine();
+  ImGui::Separator();
+  ImGui::SameLine();
+
+  static char sceneName[64] = "";
+  if (ImGui::Button("Save"))
+  {
+    strcpy(sceneName, "");
+    ImGui::OpenPopup("Save Scene As");
+  }
+
+  if (ImGui::BeginPopupModal("Save Scene As", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+  {
+    ImGui::InputText("Name", sceneName, IM_ARRAYSIZE(sceneName));
+
+    if (ImGui::Button("Save", ImVec2(120, 0)))
+    {
+      if (strlen(sceneName) > 0)
+      {
+        JSONSerializer serializer;
+        serializer.AddKeyValuePair("name", sceneName);
+        serializer.StartArray("entities");
+
+        auto& _ecs = _world.getECS();
+
+        for (Entity entity : _ecs.getEntities())
+        {
+          serializer.StartNewObject();
+
+          if (_ecs.hasComponent<Transform>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<Transform>(entity));
+          if (_ecs.hasComponent<RigidBody>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<RigidBody>(entity));
+          if (_ecs.hasComponent<Force>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<Force>(entity));
+          if (_ecs.hasComponent<Collider>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<Collider>(entity));
+          if (_ecs.hasComponent<FollowCamera>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<FollowCamera>(entity));
+          if (_ecs.hasComponent<Sprite>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<Sprite>(entity));
+          if (_ecs.hasComponent<Renderable>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<Renderable>(entity));
+          if (_ecs.hasComponent<Identification>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<Identification>(entity));
+
+          serializer.EndObject();
+        }
+
+        serializer.EndObject();
+
+        std::string filePath = std::string("scenes/") + sceneName + ".json";
+        serializer.saveToFile(filePath);
+
+        ImGui::CloseCurrentPopup();
+      }
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Cancel", ImVec2(120, 0)))
+    {
+      ImGui::CloseCurrentPopup();
+    }
+
+    ImGui::EndPopup();
+  }
+
   ImGui::End();
   ImGui::PopStyleVar(2);
-}
-
-void
-renderResources(ServiceContext& ctx, World& world)
-{
-
-  static TextureAssetBrowser textureBrowser(ctx.texture, "assets/textures");
-  textureBrowser.draw();
-
-  static ScriptBrowser scriptBrowser("scripts", world.getScriptSystem());
-  scriptBrowser.draw();
-}
 }

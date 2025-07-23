@@ -29,6 +29,5 @@ private:
   std::string _scriptContent;
   std::string _selectedScript;
 
-  bool _reload = false;
   bool _loaded = false;
 };

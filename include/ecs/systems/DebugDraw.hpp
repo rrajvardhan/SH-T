@@ -14,7 +14,7 @@ public:
     constexpr float MAX_VELOCITY_LENGTH = 50.0f;
     constexpr float MAX_FORCE_LENGTH    = 50.0f;
 
-    provider.service.graphics->setBlendMode(SDL_BLENDMODE_BLEND);
+    provider.service.graphics->setBlendMode("blend");
 
     float zoom = provider.camera.getZoom();
 
@@ -68,20 +68,28 @@ public:
         Vector2D halfSize = col.size * 0.5f * zoom;
         Vector2D topLeft  = center - halfSize;
 
-        SDL_Color color = col.isStatic ? SDL_Color{ 255, 0, 255, 128 } // Magenta for static
-                                       : SDL_Color{ 255, 0, 0, 128 };  // Red for dynamic
-
-        provider.service.graphics->drawFilledRect(static_cast<int>(topLeft.x),
-                                                  static_cast<int>(topLeft.y),
-                                                  static_cast<int>(col.size.x * zoom),
-                                                  static_cast<int>(col.size.y * zoom),
-                                                  color);
+        if (col.isStatic)
+        {
+          provider.service.graphics->drawFilledRect(static_cast<int>(topLeft.x),
+                                                    static_cast<int>(topLeft.y),
+                                                    static_cast<int>(col.size.x * zoom),
+                                                    static_cast<int>(col.size.y * zoom),
+                                                    { 255, 0, 255, 128 }); // Magenta for static
+        }
+        else
+        {
+          provider.service.graphics->drawFilledRect(static_cast<int>(topLeft.x),
+                                                    static_cast<int>(topLeft.y),
+                                                    static_cast<int>(col.size.x * zoom),
+                                                    static_cast<int>(col.size.y * zoom),
+                                                    { 255, 0, 0, 128 }); // Red for static
+        }
       }
 
       // Origin crosshair
       provider.service.graphics->drawLine(x - 3 * zoom, y, x + 3 * zoom, y, { 255, 255, 255, 255 });
       provider.service.graphics->drawLine(x, y - 3 * zoom, x, y + 3 * zoom, { 255, 255, 255, 255 });
     }
-    provider.service.graphics->setBlendMode(SDL_BLENDMODE_NONE);
+    provider.service.graphics->setBlendMode("none");
   }
 };

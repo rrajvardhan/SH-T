@@ -14,13 +14,13 @@ bool
 Application::init(EngineConfig& cfg)
 {
 
-  if (!_engine.init(cfg))
+  if (!_services.init(cfg))
   {
     LOG_ERROR("[Application] Services failed to initialize.");
     return false;
   }
   _cfg = cfg;
-  _ctx = _engine.getContext();
+  _ctx = _services.getContext();
 
   _world = new World(_ctx);
   if (!_world->init())
@@ -42,7 +42,7 @@ Application::init(EngineConfig& cfg)
 void
 Application::run()
 {
-  while (_running && !_quit)
+  while (_running)
   {
 
     _ctx.timer->update();
@@ -72,7 +72,7 @@ Application::pollEvents()
     switch (_event.type)
     {
     case SDL_QUIT:
-      _quit = true;
+      _running = false;
       break;
 
     case SDL_WINDOWEVENT:

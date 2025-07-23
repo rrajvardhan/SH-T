@@ -1,5 +1,5 @@
-#include "ScriptBrowser.hpp"
 #include "ImGuiFileDialog.h"
+#include "ScriptBrowser.hpp"
 #include "imgui.h"
 #include <filesystem>
 #include <fstream>
@@ -64,16 +64,15 @@ ScriptBrowser::draw()
     _loaded = true;
   }
 
-  if (_reload)
-  {
-    _scripts.reload();
-    _reload = false;
-  }
-
   ImGui::Begin("SCRIPTS");
 
-  float scriptListWidth = 300.0f;
-  ImGui::BeginChild("ScriptList", ImVec2(scriptListWidth, 0), true);
+  float padding    = 8.f;
+  float thumbSize  = 64.f;
+  float cellSize   = thumbSize + padding;
+  float splitWidth = ImGui::GetContentRegionAvail().x;
+  float gridWidth  = splitWidth * 0.3f;
+
+  ImGui::BeginChild("ScriptGrid", ImVec2(gridWidth, 0), true);
 
   if (ImGui::Button("Import"))
     ImGuiFileDialog::Instance()->OpenDialog("ChooseLua", "Choose Lua File", ".lua");
@@ -85,16 +84,17 @@ ScriptBrowser::draw()
       std::string srcPath  = ImGuiFileDialog::Instance()->GetFilePathName();
       std::string filename = ImGuiFileDialog::Instance()->GetCurrentFileName();
       std::string destPath = _assetDir + "/" + filename;
+
       copyToAssetFolder(srcPath, destPath);
       _loaded = false;
     }
     ImGuiFileDialog::Instance()->Close();
   }
+
   ImGui::SameLine();
   if (ImGui::Button("+"))
-  {
     ImGui::OpenPopup("NewScriptPopup");
-  }
+
   if (ImGui::BeginPopup("NewScriptPopup"))
   {
     static char newScriptName[128] = "new_script.lua";
@@ -107,13 +107,10 @@ ScriptBrowser::draw()
         std::ofstream file(newPath);
         file << "-- " << newScriptName << "\n\n";
         file.close();
-
         _loaded = false;
       }
-
       ImGui::CloseCurrentPopup();
     }
-
     ImGui::SameLine();
     if (ImGui::Button("Cancel"))
       ImGui::CloseCurrentPopup();
@@ -121,12 +118,16 @@ ScriptBrowser::draw()
   }
 
   ImGui::Separator();
-  for (int i = 0; i < (int) _scriptIDs.size(); ++i)
+
+  int columns = std::max(1, int(gridWidth / cellSize));
+  ImGui::Columns(columns, nullptr, false);
+
+  for (int i = 0; i < static_cast<int>(_scriptIDs.size());)
   {
     ImGui::PushID(i);
     const std::string& script = _scriptIDs[i];
 
-    if (ImGui::Selectable(script.c_str(), i == _selectedIndex))
+    if (ImGui::Button("lua", ImVec2(thumbSize, thumbSize)))
     {
       _selectedIndex  = i;
       _selectedScript = script;
@@ -139,8 +140,12 @@ ScriptBrowser::draw()
 
     if (ImGui::BeginPopupContextItem())
     {
-      _renameIndex = i;
-      strncpy(_renameBuffer, script.c_str(), sizeof(_renameBuffer));
+      _selectedIndex = i;
+      if (ImGui::Selectable("Rename"))
+      {
+        _renameIndex = i;
+        snprintf(_renameBuffer, sizeof(_renameBuffer), "%s", script.c_str());
+      }
 
       if (ImGui::Selectable("Delete"))
       {
@@ -159,13 +164,47 @@ ScriptBrowser::draw()
       ImGui::EndPopup();
     }
 
+    if (_renameIndex == i)
+    {
+      if (ImGui::InputText("##Rename",
+                           _renameBuffer,
+                           sizeof(_renameBuffer),
+                           ImGuiInputTextFlags_EnterReturnsTrue))
+      {
+        std::string oldPath = _assetDir + "/" + script;
+        std::string newName = _renameBuffer;
+        std::string newPath = _assetDir + "/" + newName;
+
+        if (newName != script && !std::filesystem::exists(newPath))
+        {
+          std::filesystem::rename(oldPath, newPath);
+          _scriptIDs[i] = newName;
+          if (_selectedScript == script)
+            _selectedScript = newName;
+        }
+
+        _renameIndex = -1;
+      }
+
+      if (ImGui::IsKeyPressed(ImGuiKey_Escape))
+        _renameIndex = -1;
+    }
+    else
+    {
+      ImGui::TextWrapped("%s", script.c_str());
+    }
+
+    ImGui::NextColumn();
     ImGui::PopID();
+    ++i;
   }
 
+  ImGui::Columns(1);
   ImGui::EndChild();
-  ImGui::SameLine();
 
+  ImGui::SameLine();
   ImGui::BeginChild("ScriptEditor", ImVec2(0, 0), true);
+
   if (!_selectedScript.empty())
   {
     const std::string filename = _assetDir + "/" + _selectedScript;
@@ -178,14 +217,14 @@ ScriptBrowser::draw()
     {
       _scriptContent = trimTrailingNewlines(_textEditor.GetText());
       writeScriptToFile(filename, _scriptContent);
-      _reload = true;
+      _scripts.reload();
     }
 
     if (ImGui::Button("Save"))
     {
       _scriptContent = trimTrailingNewlines(_textEditor.GetText());
       writeScriptToFile(filename, _scriptContent);
-      _reload = true;
+      _scripts.reload();
     }
 
     _textEditor.Render("Script Editor");

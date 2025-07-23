@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Log.hpp"
 #include <SDL2/SDL_render.h>
 #include <string>
 #include <unordered_map>
@@ -26,6 +27,51 @@ public:
                    float            rotation,
                    SDL_Point*       center = nullptr,
                    SDL_RendererFlip flip   = SDL_FLIP_NONE);
+  void drawTexture(SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dest, const std::string& flipStr)
+  {
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
+
+    if (flipStr == "none")
+      flip = SDL_FLIP_NONE;
+    else if (flipStr == "horizontal")
+      flip = SDL_FLIP_HORIZONTAL;
+    else if (flipStr == "vertical")
+      flip = SDL_FLIP_VERTICAL;
+    else if (flipStr == "both")
+      flip = (SDL_RendererFlip) (SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
+    else
+    {
+      LOG_ERROR("[TextureManager] Invalid flip.");
+      flip = SDL_FLIP_NONE;
+    }
+
+    drawTexture(texture, src, dest, flip);
+  }
+  void drawTexture(SDL_Texture*       texture,
+                   SDL_Rect*          src,
+                   SDL_Rect*          dest,
+                   float              rotation,
+                   SDL_Point*         center,
+                   const std::string& flipStr)
+  {
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
+
+    if (flipStr == "none")
+      flip = SDL_FLIP_NONE;
+    else if (flipStr == "horizontal")
+      flip = SDL_FLIP_HORIZONTAL;
+    else if (flipStr == "vertical")
+      flip = SDL_FLIP_VERTICAL;
+    else if (flipStr == "both")
+      flip = (SDL_RendererFlip) (SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
+    else
+    {
+      LOG_ERROR("[TextureManager] Invalid flip.");
+      flip = SDL_FLIP_NONE;
+    }
+
+    drawTexture(texture, src, dest, rotation, center, flip);
+  }
   bool hasTexture(const std::string& id) const;
   void unloadTexture(const std::string& id);
 

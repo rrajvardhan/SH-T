@@ -1,14 +1,10 @@
-#include "World.hpp"
 #include "Animation.hpp"
 #include "Camera.hpp"
 #include "CameraComponents.hpp"
 #include "Collision.hpp"
 #include "CollisionComponents.hpp"
 #include "DebugDraw.hpp"
-#include "GlobalScriptSystem.hpp"
 #include "LuaBindings.hpp"
-#include "MovingPlatform.hpp"
-#include "Objects.hpp"
 #include "Overseer.hpp"
 #include "Physics.hpp"
 #include "PhysicsComponents.hpp"
@@ -18,7 +14,7 @@
 #include "SpriteRender.hpp"
 #include "Types.hpp"
 #include "UtilComponents.hpp"
-#include <string>
+#include "World.hpp"
 
 World::World(ServiceContext& ctx) : _camera(), _ctx(ctx), _provider(ctx, _camera, _eventbus)
 {
@@ -27,9 +23,6 @@ World::World(ServiceContext& ctx) : _camera(), _ctx(ctx), _provider(ctx, _camera
 World::~World()
 {
 }
-
-Entity player;
-Entity movingPlatform;
 
 bool
 World::init()
@@ -45,8 +38,6 @@ World::init()
   _ecs.registerComponent<Sprite>();
   _ecs.registerComponent<SpriteAnimator>();
   _ecs.registerComponent<Identification>();
-  _ecs.registerComponent<PlatformerCharacter>();
-  _ecs.registerComponent<MovingPlatform>();
 
   registerMainSystems();
 
@@ -60,23 +51,23 @@ World::init()
   LuaBindings::bindFollowCamera(lua, _ecs);
   LuaBindings::bindCollider(lua, _ecs);
   LuaBindings::bindRigidBody(lua, _ecs);
-
   LuaBindings::bindKeyConstants(lua);
   LuaBindings::bindInput(lua, *_provider.service.input);
+  LuaBindings::bindTimer(lua, *_provider.service.timer);
+  LuaBindings::bindAudio(lua, *_provider.service.audio);
 
   _globalScript->loadScript("scripts/main.lua");
 
-  _eventbus.subscribe(_globalScript.get(), &GlobalScriptSystem::onAnyEvent);
+  _eventbus.subscribe(_globalScript.get(), &GlobalScriptSystem::onCollision);
 
-  //////////////////////////////////////////////////////////////////
-
-  player = _ecs.createEntity();
+  Entity player = _ecs.createEntity();
   _ecs.addComponent(player, Transform{ { 0.0f, 100.0f } });
   _ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
   _ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
   _ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
   _ecs.addComponent(player, Sprite{ .name = "bird", .srcRect = { 0, 16, 16, 16 }, .scale = 5.0f });
-
+  _ecs.addComponent(player, Identification{ "bird", "bird" });
+  _ecs.addComponent(player, FollowCamera{ true });
   SpriteAnimator animator;
   animator.animations["idle"] = Animation(
       {
@@ -93,36 +84,14 @@ World::init()
 
   animator.currentAnim = "idle";
   _ecs.addComponent(player, animator);
-  _ecs.addComponent(player, Identification{ "bird", "bird" });
 
-  // Ground
-  Entity ground = _ecs.createEntity();
-  _ecs.addComponent(ground, Transform{ { 0.0f, 500.0f } });
-  _ecs.addComponent(ground, Collider{ { 1600.0f, 16.0f }, { 0.0f, 0.0f }, true });
-  _ecs.addComponent(ground, Renderable{ { 1600.0f, 16.0f }, { 0, 255, 255, 255 } });
-
-  // Moving platform
-  movingPlatform = _ecs.createEntity();
-  _ecs.addComponent(movingPlatform, Transform{ { 0.0f, 400.0f } });
-  _ecs.addComponent(movingPlatform, Collider{ { 100.0f, 16.0f }, { 0.0f, 0.0f }, true });
-  _ecs.addComponent(movingPlatform, Renderable{ { 100.0f, 16.0f }, { 255, 128, 0, 255 } });
-  _ecs.addComponent(movingPlatform, Identification{ "MovingPlatform" });
-  _ecs.addComponent(movingPlatform, MovingPlatform{});
-
+  _sceneManager->loadScene("scenes/test.json", _ecs);
   return true;
 }
 
 void
 World::registerMainSystems()
 {
-  movingPlatformSystem = _ecs.registerSystem<MovingPlatformSystem>();
-  {
-    Signature sig;
-    sig.set(_ecs.getComponentType<Transform>());
-    sig.set(_ecs.getComponentType<MovingPlatform>());
-    _ecs.setSystemSignature<MovingPlatformSystem>(sig);
-  }
-
   physicsSystem = _ecs.registerSystem<PhysicsSystem>();
   {
     Signature sig;
@@ -182,15 +151,13 @@ World::registerMainSystems()
 void
 World::update()
 {
-  movingPlatformSystem->update(_ecs, _provider);
-
   physicsSystem->update(_ecs, _provider);
   collisionSystem->update(_ecs, _provider);
   spriteAnimationSystem->update(_ecs, _provider);
   cameraSystem->update(_ecs, _provider);
 
   if (_globalScript)
-    _globalScript->update(_ctx.timer->getDeltaTime());
+    _globalScript->update();
 }
 
 void

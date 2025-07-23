@@ -1,8 +1,4 @@
 #include "Editor.hpp"
-#include "CameraComponents.hpp"
-#include "ComponentSerializer.hpp"
-#include "JsonSerializer.hpp"
-#include "Panels.hpp"
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_sdlrenderer2.h"
@@ -10,6 +6,7 @@
 
 Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
 {
+
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
@@ -113,6 +110,10 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
   ImGui_ImplSDLRenderer2_CreateDeviceObjects();
   ImGui_ImplSDL2_InitForSDLRenderer(_ctx.graphics->getWindow(), _ctx.graphics->getRenderer());
   ImGui_ImplSDLRenderer2_Init(_ctx.graphics->getRenderer());
+
+  _btexture = new TextureBrowser(ctx.texture, "assets/textures");
+  _bscript  = new ScriptBrowser("scripts", world.getScriptSystem());
+  _baudio   = new AudioBrowser("assets/sounds", *ctx.audio);
 }
 
 void
@@ -125,7 +126,7 @@ bool _showImguiEditor = false;
 void
 Editor::update()
 {
-  if (_ctx.input->keyPressed(SDL_SCANCODE_F10))
+  if (_ctx.input->keyPressed(SDL_SCANCODE_F11))
   {
     _showImguiEditor = !_showImguiEditor;
   }
@@ -143,51 +144,14 @@ Editor::render()
   ImGui_ImplSDLRenderer2_NewFrame();
   ImGui::NewFrame();
 
-  Panels::renderDockspace(_world);
+  renderDockspace();
+  renderControls();
+  renderEntityPanel();
+  renderGamePanel();
 
-  Panels::renderControls(_active);
-  Panels::renderEntityPanel(_world);
-  Panels::renderResources(_ctx, _world);
-  Panels::renderGamePanel(_active, _ctx, _world);
-
-  if (ImGui::Begin("Editor Controls"))
-  {
-    if (ImGui::Button("Save Test Scene"))
-    {
-      auto& ecs = _world.getECS();
-
-      JSONSerializer serializer;
-      serializer.StartNewObject("Scene");
-
-      for (Entity entity : ecs.getEntities())
-      {
-        serializer.StartNewObject(std::to_string(entity));
-
-        if (ecs.hasComponent<Transform>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<Transform>(entity));
-        if (ecs.hasComponent<RigidBody>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<RigidBody>(entity));
-        if (ecs.hasComponent<Force>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<Force>(entity));
-        if (ecs.hasComponent<Collider>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<Collider>(entity));
-        if (ecs.hasComponent<FollowCamera>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<FollowCamera>(entity));
-        if (ecs.hasComponent<Sprite>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<Sprite>(entity));
-        if (ecs.hasComponent<Renderable>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<Renderable>(entity));
-        if (ecs.hasComponent<Identification>(entity))
-          ComponentSerializer::Serialize(serializer, ecs.getComponent<Identification>(entity));
-
-        serializer.EndObject();
-      }
-
-      serializer.EndObject();
-      serializer.saveToFile("test.json");
-    }
-    ImGui::End();
-  }
+  _bscript->draw();
+  _baudio->draw();
+  _btexture->draw();
 
   if (_showImguiEditor)
   {

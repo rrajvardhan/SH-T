@@ -69,7 +69,7 @@ public:
     return _signatures[entity];
   }
 
-  const std::set<Entity>& getLivingEntities() const { return _livingEntities; }
+  std::set<Entity>& getLivingEntities() { return _livingEntities; }
 
 private:
   std::queue<Entity>                  _availableEntities{};

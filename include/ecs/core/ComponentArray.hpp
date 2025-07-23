@@ -21,6 +21,7 @@ public:
     if (_entityToIndex.find(entity) != _entityToIndex.end())
     {
       LOG_DEBUG("[ComponentArray] Component added to same entity more than once.");
+      return;
     }
 
     size_t newIndex           = _size;
@@ -68,7 +69,7 @@ public:
 
     if (_entityToIndex.find(entity) == _entityToIndex.end())
     {
-      LOG_DEBUG("[ComponentArray] Retrieving non-existent component.");
+      LOG_DEBUG("[ComponentArray] Retrieving non-existent component for Entity : ", entity);
     }
 
     return _componentArray[_entityToIndex[entity]];

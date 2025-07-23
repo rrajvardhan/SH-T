@@ -21,13 +21,12 @@ private:
   int _width  = 1600;
   int _height = 900;
 
-  Services       _engine;
+  Services       _services;
   ServiceContext _ctx;
   EngineConfig   _cfg;
 
   SDL_Event _event;
   bool      _running = false;
-  bool      _quit    = false;
 
   World*  _world  = nullptr;
   Editor* _editor = nullptr;

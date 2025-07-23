@@ -1,9 +1,11 @@
-#include "LuaBindings.hpp"
+#include "AudioManager.hpp"
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
 #include "InputManager.hpp"
+#include "LuaBindings.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "Timer.hpp"
 #include "Types.hpp"
 #include "Vector2D.hpp"
 
@@ -56,25 +58,23 @@ void
 bindFollowCamera(sol::state& lua, Overseer& ecs)
 {
 
-  lua.new_usertype<FollowCamera>(
-      "FollowCamera", "target", &FollowCamera::target, "isActive", &FollowCamera::isActive);
+  lua.new_usertype<FollowCamera>("FollowCamera", "isActive", &FollowCamera::isActive);
 
   lua.set_function("get_follow_camera",
                    [&ecs](Entity e) -> FollowCamera*
                    { return &ecs.getComponent<FollowCamera>(e); });
 
   lua.set_function("add_follow_camera",
-                   [&ecs](Entity e) { ecs.addComponent(e, FollowCamera{ e, true }); });
+                   [&ecs](Entity e) { ecs.addComponent(e, FollowCamera{ true }); });
 
   lua.set_function("remove_follow_camera",
                    [&ecs](Entity e) { ecs.removeComponent<FollowCamera>(e); });
 
-  lua.set_function("set_follow_camera_target",
-                   [&ecs](Entity cam, Entity target)
+  lua.set_function("set_follow_camera",
+                   [&ecs](Entity entity, bool state)
                    {
-                     auto& fc    = ecs.getComponent<FollowCamera>(cam);
-                     fc.target   = target;
-                     fc.isActive = true;
+                     auto& fc    = ecs.getComponent<FollowCamera>(entity);
+                     fc.isActive = state;
                    });
 
   lua.set_function("create_follow_camera",
@@ -130,16 +130,62 @@ bindRigidBody(sol::state& lua, Overseer& ecs)
 void
 bindKeyConstants(sol::state& lua)
 {
-  lua.set("KEY_A", SDL_SCANCODE_A);
-  lua.set("KEY_D", SDL_SCANCODE_D);
-  lua.set("KEY_W", SDL_SCANCODE_W);
-  lua.set("KEY_S", SDL_SCANCODE_S);
-  lua.set("KEY_SPACE", SDL_SCANCODE_SPACE);
+  // A-Z
+  for (char c = 'A'; c <= 'Z'; ++c)
+  {
+    std::string key = "KEY_";
+    key += c;
+    lua.set(key, SDL_SCANCODE_A + (c - 'A'));
+  }
+
+  // 0–9
+  for (char c = '0'; c <= '9'; ++c)
+  {
+    std::string key = "KEY_";
+    key += c;
+    lua.set(key, SDL_SCANCODE_0 + (c - '0'));
+  }
+
+  // Arrow keys
   lua.set("KEY_LEFT", SDL_SCANCODE_LEFT);
   lua.set("KEY_RIGHT", SDL_SCANCODE_RIGHT);
   lua.set("KEY_UP", SDL_SCANCODE_UP);
   lua.set("KEY_DOWN", SDL_SCANCODE_DOWN);
+
+  // Whitespace and control
+  lua.set("KEY_SPACE", SDL_SCANCODE_SPACE);
+  lua.set("KEY_TAB", SDL_SCANCODE_TAB);
+  lua.set("KEY_ENTER", SDL_SCANCODE_RETURN);
   lua.set("KEY_ESCAPE", SDL_SCANCODE_ESCAPE);
+  lua.set("KEY_BACKSPACE", SDL_SCANCODE_BACKSPACE);
+
+  // Modifier keys
+  lua.set("KEY_LSHIFT", SDL_SCANCODE_LSHIFT);
+  lua.set("KEY_RSHIFT", SDL_SCANCODE_RSHIFT);
+  lua.set("KEY_LCTRL", SDL_SCANCODE_LCTRL);
+  lua.set("KEY_RCTRL", SDL_SCANCODE_RCTRL);
+  lua.set("KEY_LALT", SDL_SCANCODE_LALT);
+  lua.set("KEY_RALT", SDL_SCANCODE_RALT);
+
+  // Common symbols (US QWERTY)
+  lua.set("KEY_MINUS", SDL_SCANCODE_MINUS);               // -
+  lua.set("KEY_EQUALS", SDL_SCANCODE_EQUALS);             // =
+  lua.set("KEY_LEFTBRACKET", SDL_SCANCODE_LEFTBRACKET);   // [
+  lua.set("KEY_RIGHTBRACKET", SDL_SCANCODE_RIGHTBRACKET); // ]
+  lua.set("KEY_BACKSLASH", SDL_SCANCODE_BACKSLASH);       // "\"
+  lua.set("KEY_SEMICOLON", SDL_SCANCODE_SEMICOLON);       // ;
+  lua.set("KEY_APOSTROPHE", SDL_SCANCODE_APOSTROPHE);     // '
+  lua.set("KEY_GRAVE", SDL_SCANCODE_GRAVE);               // `
+  lua.set("KEY_COMMA", SDL_SCANCODE_COMMA);               // ,
+  lua.set("KEY_PERIOD", SDL_SCANCODE_PERIOD);             // .
+  lua.set("KEY_SLASH", SDL_SCANCODE_SLASH);               // /
+
+  // Function keys
+  for (int i = 1; i <= 12; ++i)
+  {
+    std::string key = "KEY_F" + std::to_string(i);
+    lua.set(key, SDL_SCANCODE_F1 + (i - 1));
+  }
 }
 
 void
@@ -154,6 +200,50 @@ bindInput(sol::state& lua, InputManager& input)
                                  "key_released",
                                  &InputManager::keyReleased);
   lua["Input"] = &input;
+}
+
+void
+bindTimer(sol::state& lua, Timer& timer)
+{
+
+  lua.new_usertype<Timer>("Timer", "delta_time", &Timer::getDeltaTime);
+  lua["Timer"] = &timer;
+}
+
+void
+bindAudio(sol::state& lua, AudioManager& audio)
+{
+  lua.new_usertype<AudioManager>("AudioManager",
+                                 // Music
+                                 "add_music",
+                                 &AudioManager::addMusic,
+                                 "play_music",
+                                 &AudioManager::playMusic,
+                                 "stop_music",
+                                 &AudioManager::stopMusic,
+                                 "pause_music",
+                                 &AudioManager::pauseMusic,
+                                 "resume_music",
+                                 &AudioManager::resumeMusic,
+                                 "unload_music",
+                                 &AudioManager::unloadMusic,
+                                 "has_music",
+                                 &AudioManager::hasMusic,
+
+                                 // SFX
+                                 "add_sfx",
+                                 &AudioManager::addSFX,
+                                 "play_sfx",
+                                 &AudioManager::playSFX,
+                                 "unload_sfx",
+                                 &AudioManager::unloadSFX,
+                                 "has_sfx",
+                                 &AudioManager::hasSFX,
+
+                                 // Utility
+                                 "rename",
+                                 &AudioManager::renameAudio);
+  lua["Audio"] = &audio;
 }
 
 } // namespace LuaBindings

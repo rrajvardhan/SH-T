@@ -1,10 +1,13 @@
 #pragma once
 
 #include "Configs.hpp"
+#include "Log.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_blendmode.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>
+#include <cctype>
+#include <string>
 
 class Graphics
 {
@@ -29,11 +32,52 @@ public:
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
   }
 
-  void setBlendMode(SDL_BlendMode mode) { SDL_SetRenderDrawBlendMode(_renderer, mode); }
-
-  void setTextureBlendMode(SDL_Texture* tex, SDL_BlendMode mode)
+  void setBlendMode(const std::string& mode)
   {
-    SDL_SetTextureBlendMode(tex, mode);
+    SDL_BlendMode blendMode = SDL_BLENDMODE_INVALID;
+
+    if (mode == "none")
+      blendMode = SDL_BLENDMODE_NONE;
+    else if (mode == "blend")
+      blendMode = SDL_BLENDMODE_BLEND;
+    else if (mode == "add")
+      blendMode = SDL_BLENDMODE_ADD;
+    else if (mode == "mod")
+      blendMode = SDL_BLENDMODE_MOD;
+    else if (mode == "mul")
+      blendMode = SDL_BLENDMODE_MUL;
+
+    if (blendMode == SDL_BLENDMODE_INVALID)
+    {
+      LOG_ERROR("[Graphics] Invalid SDL Blend mode.");
+      return;
+    }
+
+    SDL_SetRenderDrawBlendMode(_renderer, blendMode);
+  }
+
+  void setTextureBlendMode(SDL_Texture* tex, const std::string& mode)
+  {
+    SDL_BlendMode blendMode = SDL_BLENDMODE_INVALID;
+
+    if (mode == "none")
+      blendMode = SDL_BLENDMODE_NONE;
+    else if (mode == "blend")
+      blendMode = SDL_BLENDMODE_BLEND;
+    else if (mode == "add")
+      blendMode = SDL_BLENDMODE_ADD;
+    else if (mode == "mod")
+      blendMode = SDL_BLENDMODE_MOD;
+    else if (mode == "mul")
+      blendMode = SDL_BLENDMODE_MUL;
+
+    if (blendMode == SDL_BLENDMODE_INVALID)
+    {
+      LOG_ERROR("[Graphics] Invalid SDL Blend mode.");
+      return;
+    }
+
+    SDL_SetTextureBlendMode(tex, blendMode);
   }
 
   void drawRectOutline(int x, int y, int w, int h, SDL_Color color);

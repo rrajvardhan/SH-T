@@ -7,13 +7,14 @@
 #include "DebugDraw.hpp"
 #include "EventBus.hpp"
 #include "GlobalScriptSystem.hpp"
-#include "MovingPlatform.hpp"
 #include "Overseer.hpp"
 #include "Physics.hpp"
 #include "Provider.hpp"
 #include "Renderable.hpp"
+#include "SceneManager.hpp"
 #include "ServiceContext.hpp"
 #include "SpriteRender.hpp"
+#include <memory>
 
 class World
 {
@@ -32,6 +33,16 @@ public:
   EventBus&           getEventBus() { return _eventbus; }
   GlobalScriptSystem& getScriptSystem() { return *_globalScript; }
 
+  void clearAll()
+  {
+    std::vector<Entity> toDestroy;
+    for (Entity e : _ecs.getEntities())
+      toDestroy.push_back(e);
+
+    for (Entity e : toDestroy)
+      _ecs.destroyEntity(e);
+  }
+
   bool isDebug = false;
 
 private:
@@ -41,16 +52,18 @@ private:
   WorldProvider   _provider;
   EventBus        _eventbus;
 
+  // Scene Manager
+  std::unique_ptr<SceneManager> _sceneManager;
+
   // Lua scripting System
   std::unique_ptr<GlobalScriptSystem> _globalScript;
 
   // Main Systems
-  std::shared_ptr<MovingPlatformSystem> movingPlatformSystem;
-  std::shared_ptr<PhysicsSystem>        physicsSystem;
-  std::shared_ptr<RenderSystem>         renderSystem;
-  std::shared_ptr<DebugDrawSystem>      debugDrawSystem;
-  std::shared_ptr<CollisionSystem>      collisionSystem;
-  std::shared_ptr<FollowCameraSystem>   cameraSystem;
-  std::shared_ptr<SpriteSystem>         spriteRenderSystem;
-  std::shared_ptr<AnimationSystem>      spriteAnimationSystem;
+  std::shared_ptr<PhysicsSystem>      physicsSystem;
+  std::shared_ptr<RenderSystem>       renderSystem;
+  std::shared_ptr<DebugDrawSystem>    debugDrawSystem;
+  std::shared_ptr<CollisionSystem>    collisionSystem;
+  std::shared_ptr<FollowCameraSystem> cameraSystem;
+  std::shared_ptr<SpriteSystem>       spriteRenderSystem;
+  std::shared_ptr<AnimationSystem>    spriteAnimationSystem;
 };

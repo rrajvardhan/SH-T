@@ -24,14 +24,13 @@ copyToAssetFolder(const std::string& srcPath, const std::string& destPath)
   dst << src.rdbuf();
 }
 
-TextureAssetBrowser::TextureAssetBrowser(TextureManager*    textureManager,
-                                         const std::string& assetDir)
+TextureBrowser::TextureBrowser(TextureManager* textureManager, const std::string& assetDir)
     : _textureManager(textureManager), _assetDir(assetDir)
 {
 }
 
 void
-TextureAssetBrowser::loadTextures()
+TextureBrowser::loadTextures()
 {
   namespace fs = std::filesystem;
   for (const auto& file : fs::directory_iterator(_assetDir))
@@ -55,8 +54,9 @@ TextureAssetBrowser::loadTextures()
 }
 
 void
-TextureAssetBrowser::draw()
+TextureBrowser::draw()
 {
+
   if (!_loaded)
   {
     loadTextures();
@@ -65,13 +65,17 @@ TextureAssetBrowser::draw()
 
   ImGui::Begin("TEXTURES");
 
-  if (ImGui::Button("+ Add Texture"))
+  float padding      = 8.f;
+  float cellSize     = _thumbSize + padding;
+  float splitWidth   = ImGui::GetContentRegionAvail().x;
+  float gridWidth    = splitWidth * 0.3f;
+  float previewWidth = splitWidth - gridWidth - 8.f;
+
+  ImGui::BeginChild("TextureGrid", ImVec2(gridWidth, 0), true);
+  if (ImGui::Button("Import"))
   {
     ImGuiFileDialog::Instance()->OpenDialog("ChooseTex", "Choose Texture", ".png");
   }
-
-  ImGui::Separator();
-
   if (ImGuiFileDialog::Instance()->Display("ChooseTex"))
   {
     if (ImGuiFileDialog::Instance()->IsOk())
@@ -79,38 +83,29 @@ TextureAssetBrowser::draw()
       std::string fullPath = ImGuiFileDialog::Instance()->GetFilePathName();
       std::string filename = ImGuiFileDialog::Instance()->GetCurrentFileName();
       std::string id       = std::filesystem::path(filename).stem().string();
-
       std::string destPath = _assetDir + "/" + filename;
 
       copyToAssetFolder(fullPath, destPath);
 
       if (!_textureManager->hasTexture(id))
       {
-        if (_textureManager->addTexture(id, fullPath))
-
+        if (_textureManager->addTexture(id, destPath))
           _textureIDs.push_back(id);
       }
     }
     ImGuiFileDialog::Instance()->Close();
   }
 
-  float padding    = 8.f;
-  float cellSize   = _thumbSize + padding;
-  float panelWidth = ImGui::GetContentRegionAvail().x;
-  int   columns    = (int) (panelWidth / cellSize);
-  if (columns < 1)
-    columns = 1;
-
+  ImGui::Separator();
+  int columns = std::max(1, int(gridWidth / cellSize));
   ImGui::Columns(columns, nullptr, false);
 
   for (int i = 0; i < (int) _textureIDs.size();)
   {
     ImGui::PushID(i);
     const std::string& texID = _textureIDs[i];
-
     if (ImGui::Button("png", ImVec2(_thumbSize, _thumbSize)))
       _selectedIndex = i;
-
     if (ImGui::BeginPopupContextItem())
     {
       _contextIndex = i;
@@ -121,11 +116,9 @@ TextureAssetBrowser::draw()
       }
       if (ImGui::Selectable("Delete"))
       {
-
         std::string filePath = _assetDir + "/" + texID + ".png";
         if (std::filesystem::exists(filePath))
           std::filesystem::remove(filePath);
-
         _textureManager->unloadTexture(texID);
         _textureIDs.erase(_textureIDs.begin() + i);
         if (_selectedIndex == i)
@@ -147,10 +140,8 @@ TextureAssetBrowser::draw()
         std::string newID = _renameBuffer;
         if (newID != texID && !_textureManager->hasTexture(newID))
         {
-
           std::string oldPath = _assetDir + "/" + texID + ".png";
           std::string newPath = _assetDir + "/" + newID + ".png";
-
           if (std::filesystem::exists(oldPath))
           {
             std::filesystem::rename(oldPath, newPath);
@@ -175,5 +166,33 @@ TextureAssetBrowser::draw()
   }
 
   ImGui::Columns(1);
+  ImGui::EndChild();
+  ImGui::SameLine();
+  ImGui::BeginChild("TexturePreview", ImVec2(0, 0), true);
+
+  if (_selectedIndex >= 0 && _selectedIndex < (int) _textureIDs.size())
+  {
+    const std::string& selectedID = _textureIDs[_selectedIndex];
+    auto*              tex        = _textureManager->getTexture(selectedID);
+    if (tex)
+    {
+      int w, h;
+      SDL_QueryTexture(tex, nullptr, nullptr, &w, &h);
+
+      float  maxPreviewSize = previewWidth - 16.f;
+      float  scale          = std::min(maxPreviewSize / w, maxPreviewSize / h);
+      ImVec2 scaledSize(w * scale, h * scale);
+
+      ImGui::Text("Preview: %s", selectedID.c_str());
+      ImGui::Text("Size: %dx%d", w, h);
+      ImGui::Image(reinterpret_cast<ImTextureID>(tex), scaledSize);
+    }
+    else
+    {
+      ImGui::Text("Missing texture.");
+    }
+  }
+
+  ImGui::EndChild();
   ImGui::End();
 }

@@ -48,11 +48,11 @@ GlobalScriptSystem::loadScript(const std::string& path)
 }
 
 void
-GlobalScriptSystem::update(float dt)
+GlobalScriptSystem::update()
 {
   if (_updatefunc.valid())
   {
-    sol::protected_function_result result = _updatefunc(dt);
+    sol::protected_function_result result = _updatefunc();
     if (!result.valid())
     {
       sol::error err = result;
@@ -64,6 +64,7 @@ GlobalScriptSystem::update(float dt)
 void
 GlobalScriptSystem::reload()
 {
+  _luaSubscribers.clear();
   if (!_scriptPath.empty())
     loadScript(_scriptPath);
 }
@@ -86,24 +87,12 @@ GlobalScriptSystem::publish_lua(const std::string& eventName, const sol::table& 
 }
 
 void
-GlobalScriptSystem::onAnyEvent(CollisionEvent* e)
+GlobalScriptSystem::onCollision(CollisionEvent* e)
 {
   sol::table payload = _lua.create_table();
 
   payload["entity_a"] = e->a;
   payload["entity_b"] = e->b;
 
-  auto it = _luaSubscribers.find("CollisionEvent");
-  if (it == _luaSubscribers.end())
-    return;
-
-  for (auto& cb : it->second)
-  {
-    sol::protected_function_result result = cb(payload);
-    if (!result.valid())
-    {
-      sol::error err = result;
-      LOG_ERROR("[Lua] CollisionEvent handler error: ", err.what());
-    }
-  }
+  publish_lua("CollisionEvent", payload);
 }

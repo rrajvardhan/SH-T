@@ -13,13 +13,14 @@ class GlobalScriptSystem
 public:
   GlobalScriptSystem();
 
-  void        update(float dt);
+  void        update();
   void        bind(Overseer& ecs);
   void        loadScript(const std::string& path);
   void        reload();
+  void        reload(std::string& path);
   sol::state& getLuaState() { return _lua; }
 
-  void onAnyEvent(CollisionEvent* e);
+  void onCollision(CollisionEvent* e);
 
 private:
   sol::state    _lua;

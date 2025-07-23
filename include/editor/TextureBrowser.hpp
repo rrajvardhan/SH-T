@@ -6,10 +6,10 @@
 
 class TextureManager;
 
-class TextureAssetBrowser
+class TextureBrowser
 {
 public:
-  TextureAssetBrowser(TextureManager* textureManager, const std::string& assetDir);
+  TextureBrowser(TextureManager* textureManager, const std::string& assetDir);
 
   void draw();
 
