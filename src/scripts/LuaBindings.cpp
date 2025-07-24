@@ -1,3 +1,4 @@
+#include "Animation.hpp"
 #include "AudioManager.hpp"
 #include "Camera2D.hpp"
 #include "CameraComponents.hpp"
@@ -6,6 +7,7 @@
 #include "LuaBindings.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "SpriteComponents.hpp"
 #include "Timer.hpp"
 #include "Types.hpp"
 #include "Vector2D.hpp"
@@ -281,6 +283,24 @@ bindSceneManager(sol::state& lua, SceneManager& sceneManager, Overseer& ecs)
 {
   lua.set_function("load_scene",
                    [&](const std::string& path) { sceneManager.loadScene(path, ecs); });
+}
+
+void
+lua_playAnimation(Overseer& ecs, Entity e, const std::string& animName)
+{
+  if (!ecs.hasComponent<SpriteAnimator>(e))
+    return;
+
+  auto& animator = ecs.getComponent<SpriteAnimator>(e);
+  playAnimation(animator, animName);
+}
+
+void
+bindAnimation(sol::state& lua, Overseer& ecs)
+{
+  lua.set_function("play_animation",
+                   [&ecs](Entity e, const std::string& animName)
+                   { LuaBindings::lua_playAnimation(ecs, e, animName); });
 }
 
 } // namespace LuaBindings

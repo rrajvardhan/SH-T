@@ -57,6 +57,7 @@ World::init()
   LuaBindings::bindAudio(lua, *_provider.service.audio);
   LuaBindings::bindCamera2D(lua, getCamera());
   LuaBindings::bindSceneManager(lua, *_sceneManager, _ecs);
+  LuaBindings::bindAnimation(lua, _ecs);
 
   _globalScript->loadScript("scripts/main.lua");
   _sceneManager->loadScene("scenes/test.json", _ecs);
@@ -75,6 +76,13 @@ World::init()
   SpriteAnimator animator;
   animator.animations["idle"] = Animation(
       {
+          AnimationFrame({ 0, 0, 16, 16 }),
+          AnimationFrame({ 16, 0, 16, 16 }),
+      },
+      500,
+      "bird");
+  animator.animations["fly"] = Animation(
+      {
           AnimationFrame({ 16 * 0, 16, 16, 16 }),
           AnimationFrame({ 16 * 1, 16, 16, 16 }),
           AnimationFrame({ 16 * 2, 16, 16, 16 }),
@@ -87,8 +95,7 @@ World::init()
       150,
       "bird");
 
-  playAnimation(animator, "idle");
-
+  playAnimation(animator, "fly");
   _ecs.addComponent(player, animator);
 
   return true;
