@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Overseer.hpp"
 #include "Provider.hpp"
 #include "SpriteComponents.hpp"
@@ -16,6 +17,8 @@ public:
       auto& sprite   = ecs.getComponent<Sprite>(entity);
 
       const auto& anim = animator.animations[animator.currentAnim];
+      if (animator.animations.empty())
+        continue;
       if (anim.frames.empty())
         continue;
 
@@ -26,18 +29,23 @@ public:
         animator.currentFrame = (animator.currentFrame + 1) % anim.frames.size();
       }
 
-      sprite.srcRect = anim.frames[animator.currentFrame].rect;
-      sprite.offset  = anim.frames[animator.currentFrame].offset;
+      const auto& frame = anim.frames[animator.currentFrame];
+
+      if (!anim.textureId.empty())
+        sprite.textureId = anim.textureId;
+
+      sprite.srcRect = frame.rect;
+      sprite.offset  = frame.offset;
     }
   }
 };
 
 inline void
-playAnimation(SpriteAnimator& animator, const std::string& name)
+playAnimation(SpriteAnimator& animator, const std::string& textureId)
 {
-  if (animator.currentAnim != name)
+  if (animator.currentAnim != textureId)
   {
-    animator.currentAnim  = name;
+    animator.currentAnim  = textureId;
     animator.currentFrame = 0;
     animator.timer        = 0.0f;
   }

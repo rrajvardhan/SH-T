@@ -32,16 +32,7 @@ public:
   Camera2D&           getCamera() { return _camera; }
   EventBus&           getEventBus() { return _eventbus; }
   GlobalScriptSystem& getScriptSystem() { return *_globalScript; }
-
-  void clearAll()
-  {
-    std::vector<Entity> toDestroy;
-    for (Entity e : _ecs.getEntities())
-      toDestroy.push_back(e);
-
-    for (Entity e : toDestroy)
-      _ecs.destroyEntity(e);
-  }
+  SceneManager&       getSceneManager() { return *_sceneManager; }
 
   bool isDebug = false;
 

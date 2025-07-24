@@ -3,6 +3,7 @@
 #include "AudioManager.hpp"
 #include "Camera2D.hpp"
 #include "InputManager.hpp"
+#include "SceneManager.hpp"
 #include "Timer.hpp"
 #include "sol/state.hpp"
 #include <sol/sol.hpp>
@@ -46,4 +47,10 @@ bindTimer(sol::state& lua, Timer& timer);
 
 void
 bindAudio(sol::state& lua, AudioManager& audio);
+
+void
+bindCamera2D(sol::state& lua, Camera2D& camera2D);
+
+void
+bindSceneManager(sol::state& lua, SceneManager& sceneManager, Overseer& ecs);
 }

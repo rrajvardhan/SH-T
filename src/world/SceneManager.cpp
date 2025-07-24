@@ -1,8 +1,13 @@
 #include "ComponentSerializer.hpp"
 #include "Json.hpp"
+#include "Log.hpp"
 #include "Overseer.hpp"
 #include "SceneManager.hpp"
 #include <iostream>
+
+SceneManager::SceneManager()
+{
+}
 
 SceneManager::~SceneManager()
 {
@@ -11,6 +16,8 @@ SceneManager::~SceneManager()
 void
 SceneManager::loadScene(const std::string& path, Overseer& ecs)
 {
+  clearAll(ecs);
+
   std::ifstream inFile(path);
   if (!inFile.is_open())
   {
@@ -88,5 +95,7 @@ SceneManager::loadScene(const std::string& path, Overseer& ecs)
     }
   }
 
-  std::cout << "Scene '" << root.value("name", "<unnamed>") << "' loaded.\n";
+  _currentScene = path;
+
+  LOG_INFO("Scene '", root.value("name", "<unnamed>"), "' loaded.\n");
 }

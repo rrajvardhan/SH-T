@@ -1,4 +1,5 @@
 #include "AudioManager.hpp"
+#include "Camera2D.hpp"
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
 #include "InputManager.hpp"
@@ -139,12 +140,13 @@ bindKeyConstants(sol::state& lua)
   }
 
   // 0–9
-  for (char c = '0'; c <= '9'; ++c)
+  for (char c = '1'; c <= '9'; ++c)
   {
     std::string key = "KEY_";
     key += c;
-    lua.set(key, SDL_SCANCODE_0 + (c - '0'));
+    lua.set(key, SDL_SCANCODE_1 + (c - '1'));
   }
+  lua.set("KEY_0", SDL_SCANCODE_0);
 
   // Arrow keys
   lua.set("KEY_LEFT", SDL_SCANCODE_LEFT);
@@ -244,6 +246,41 @@ bindAudio(sol::state& lua, AudioManager& audio)
                                  "rename",
                                  &AudioManager::renameAudio);
   lua["Audio"] = &audio;
+}
+
+void
+bindCamera2D(sol::state& lua, Camera2D& camera2D)
+{
+  lua.new_usertype<Camera2D>("Camera2D",
+                             sol::constructors<Camera2D(), Camera2D(int, int)>(),
+
+                             // Getters
+                             "get_position",
+                             &Camera2D::getPosition,
+                             "get_offset",
+                             &Camera2D::getOffset,
+                             "get_viewport_width",
+                             &Camera2D::getViewportWidth,
+                             "get_viewport_height",
+                             &Camera2D::getViewportHeight,
+                             "get_zoom",
+                             &Camera2D::getZoom,
+
+                             // Setters
+                             "set_position",
+                             &Camera2D::setPosition,
+                             "set_viewport",
+                             &Camera2D::setViewport,
+                             "set_zoom",
+                             &Camera2D::setZoom);
+  lua["Camera"] = &camera2D;
+}
+
+void
+bindSceneManager(sol::state& lua, SceneManager& sceneManager, Overseer& ecs)
+{
+  lua.set_function("load_scene",
+                   [&](const std::string& path) { sceneManager.loadScene(path, ecs); });
 }
 
 } // namespace LuaBindings

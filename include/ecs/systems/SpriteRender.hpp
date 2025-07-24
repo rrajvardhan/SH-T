@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Log.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
 #include "Provider.hpp"
@@ -37,7 +36,7 @@ public:
       auto& sprite    = ecs.getComponent<Sprite>(entry.entity);
       auto& transform = ecs.getComponent<Transform>(entry.entity);
 
-      if (sprite.name.empty())
+      if (sprite.textureId.empty())
         continue;
 
       float zoom = provider.camera.getZoom();
@@ -54,7 +53,7 @@ public:
       dest.x = (int) (renderPos.x - scaledW / 2.0f);
       dest.y = (int) (renderPos.y - scaledH / 2.0f);
 
-      auto tex = provider.service.texture->getTexture(sprite.name);
+      auto tex = provider.service.texture->getTexture(sprite.textureId);
 
       provider.service.graphics->setTextureBlendMode(tex, sprite.blendMode);
       provider.service.texture->drawTexture(

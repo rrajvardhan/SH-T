@@ -18,6 +18,8 @@
 
 World::World(ServiceContext& ctx) : _camera(), _ctx(ctx), _provider(ctx, _camera, _eventbus)
 {
+  _sceneManager = std::make_unique<SceneManager>();
+  _globalScript = std::make_unique<GlobalScriptSystem>();
 }
 
 World::~World()
@@ -41,9 +43,7 @@ World::init()
 
   registerMainSystems();
 
-  _globalScript = std::make_unique<GlobalScriptSystem>();
   _globalScript->bind(_ecs);
-
   auto& lua = _globalScript->getLuaState();
 
   LuaBindings::bindVector2D(lua);
@@ -55,8 +55,11 @@ World::init()
   LuaBindings::bindInput(lua, *_provider.service.input);
   LuaBindings::bindTimer(lua, *_provider.service.timer);
   LuaBindings::bindAudio(lua, *_provider.service.audio);
+  LuaBindings::bindCamera2D(lua, getCamera());
+  LuaBindings::bindSceneManager(lua, *_sceneManager, _ecs);
 
   _globalScript->loadScript("scripts/main.lua");
+  _sceneManager->loadScene("scenes/test.json", _ecs);
 
   _eventbus.subscribe(_globalScript.get(), &GlobalScriptSystem::onCollision);
 
@@ -65,27 +68,29 @@ World::init()
   _ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
   _ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
   _ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
-  _ecs.addComponent(player, Sprite{ .name = "bird", .srcRect = { 0, 16, 16, 16 }, .scale = 5.0f });
+  _ecs.addComponent(player,
+                    Sprite{ .textureId = "bird", .srcRect = { 0, 16, 16, 16 }, .scale = 5.0f });
   _ecs.addComponent(player, Identification{ "bird", "bird" });
   _ecs.addComponent(player, FollowCamera{ true });
   SpriteAnimator animator;
   animator.animations["idle"] = Animation(
       {
-          { { 16 * 0, 16, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 1, 16, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 2, 16, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 3, 16, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 4, 16, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 5, 16, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 6, 16, 16, 16 }, { 0.0f, 0.0f } },
-          { { 16 * 7, 16, 16, 16 }, { 0.0f, 0.0f } },
+          AnimationFrame({ 16 * 0, 16, 16, 16 }),
+          AnimationFrame({ 16 * 1, 16, 16, 16 }),
+          AnimationFrame({ 16 * 2, 16, 16, 16 }),
+          AnimationFrame({ 16 * 3, 16, 16, 16 }),
+          AnimationFrame({ 16 * 4, 16, 16, 16 }),
+          AnimationFrame({ 16 * 5, 16, 16, 16 }),
+          AnimationFrame({ 16 * 6, 16, 16, 16 }),
+          AnimationFrame({ 16 * 7, 16, 16, 16 }),
       },
-      150);
+      150,
+      "bird");
 
-  animator.currentAnim = "idle";
+  playAnimation(animator, "idle");
+
   _ecs.addComponent(player, animator);
 
-  _sceneManager->loadScene("scenes/test.json", _ecs);
   return true;
 }
 

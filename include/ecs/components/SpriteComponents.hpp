@@ -7,8 +7,8 @@
 
 struct Sprite
 {
-  std::string name;
-  SDL_Rect    srcRect{ 0, 0, 0, 0 }; // TODO: use vector2d or start_x , start_y and width and height
+  std::string textureId;
+  SDL_Rect    srcRect{ 0, 0, 0, 0 };
   float       scale  = 1.0f;
   std::string flip   = "none";
   Vector2D    offset = { 0.0f, 0.0f };
@@ -19,7 +19,7 @@ struct Sprite
 
 struct AnimationFrame
 {
-  SDL_Rect rect; // TODO: use vector2d or start_x , start_y and width and height
+  SDL_Rect rect;
   Vector2D offset;
 
   AnimationFrame(SDL_Rect r, Vector2D o = { 0, 0 }) : rect(r), offset(o) {}
@@ -29,9 +29,13 @@ struct Animation
 {
   std::vector<AnimationFrame> frames;
   int                         speed = 100;
+  std::string                 textureId;
 
   Animation() = default;
-  Animation(std::vector<AnimationFrame> af, int s) : frames(af), speed(s) {}
+  Animation(std::vector<AnimationFrame> af, int s, std::string name)
+      : frames(af), speed(s), textureId(name)
+  {
+  }
 };
 
 struct SpriteAnimator

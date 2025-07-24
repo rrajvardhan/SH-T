@@ -3,6 +3,7 @@
 #include "ComponentSerializer.hpp"
 #include "Editor.hpp"
 #include "JsonSerializer.hpp"
+#include "Log.hpp"
 #include "PhysicsComponents.hpp"
 #include "RenderableComponents.hpp"
 #include "ServiceContext.hpp"
@@ -75,7 +76,10 @@ Editor::renderGamePanel()
     if (scroll != 0.0f)
     {
       targetZoom += scroll * 0.1f;
-      targetZoom = std::clamp(targetZoom, 0.25f, 4.0f);
+      targetZoom = std::clamp(targetZoom, 0.1f, 10.0f);
+
+      currentZoom = currentZoom + (targetZoom - currentZoom);
+      _world.getCamera().setZoom(currentZoom);
     }
 
     if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
@@ -125,9 +129,6 @@ Editor::renderGamePanel()
 
   _world.getCamera().setViewport(newW, newH);
   _world.render();
-
-  currentZoom = currentZoom + (targetZoom - currentZoom) * 0.1f;
-  _world.getCamera().setZoom(currentZoom);
 
   SDL_SetRenderTarget(_ctx.graphics->getRenderer(), nullptr);
   if (gameTexture)
@@ -197,25 +198,29 @@ Editor::renderEntityPanel()
         if (ImGui::CollapsingHeader("Identification", header))
         {
           auto& i = _ecs.getComponent<Identification>(entity);
-          char  nameBuffer[128];
-          strncpy(nameBuffer, i.name.c_str(), sizeof(nameBuffer));
-          nameBuffer[sizeof(nameBuffer) - 1] = '\0';
+          char  textureIdBuffer[128];
+          strncpy(textureIdBuffer, i.name.c_str(), sizeof(textureIdBuffer));
+          textureIdBuffer[sizeof(textureIdBuffer) - 1] = '\0';
 
-          if (ImGui::InputText(
-                  "Name", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+          if (ImGui::InputText("textureId",
+                               textureIdBuffer,
+                               sizeof(textureIdBuffer),
+                               ImGuiInputTextFlags_EnterReturnsTrue))
           {
             if (ImGui::IsItemDeactivatedAfterEdit())
-              i.name = std::string(nameBuffer);
+              i.name = std::string(textureIdBuffer);
           }
-          char gnameBuffer[128];
-          strncpy(gnameBuffer, i.group.c_str(), sizeof(gnameBuffer));
-          gnameBuffer[sizeof(gnameBuffer) - 1] = '\0';
+          char gtextureIdBuffer[128];
+          strncpy(gtextureIdBuffer, i.group.c_str(), sizeof(gtextureIdBuffer));
+          gtextureIdBuffer[sizeof(gtextureIdBuffer) - 1] = '\0';
 
-          if (ImGui::InputText(
-                  "Group", gnameBuffer, sizeof(gnameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+          if (ImGui::InputText("Group",
+                               gtextureIdBuffer,
+                               sizeof(gtextureIdBuffer),
+                               ImGuiInputTextFlags_EnterReturnsTrue))
           {
             if (ImGui::IsItemDeactivatedAfterEdit())
-              i.group = std::string(gnameBuffer);
+              i.group = std::string(gtextureIdBuffer);
           }
 
           ImGui::NewLine();
@@ -349,21 +354,21 @@ Editor::renderEntityPanel()
 
         if (ImGui::CollapsingHeader("Sprite", header))
         {
-          static char   nameBuffer[128] = "";
-          static Entity lastEntity      = INVALID_ENTITY;
+          static char   textureIdBuffer[128] = "";
+          static Entity lastEntity           = INVALID_ENTITY;
           if (lastEntity != entity)
           {
-            strncpy(nameBuffer, sprite.name.c_str(), sizeof(nameBuffer));
-            nameBuffer[sizeof(nameBuffer) - 1] = '\0';
-            lastEntity                         = entity;
+            strncpy(textureIdBuffer, sprite.textureId.c_str(), sizeof(textureIdBuffer));
+            textureIdBuffer[sizeof(textureIdBuffer) - 1] = '\0';
+            lastEntity                                   = entity;
           }
 
-          if (ImGui::InputText("Name##Sprite",
-                               nameBuffer,
-                               sizeof(nameBuffer),
+          if (ImGui::InputText("textureId##Sprite",
+                               textureIdBuffer,
+                               sizeof(textureIdBuffer),
                                ImGuiInputTextFlags_EnterReturnsTrue))
           {
-            sprite.name = nameBuffer;
+            sprite.textureId = textureIdBuffer;
           }
 
           ImGui::DragInt4("Src Rect##Sprite", (int*) &sprite.srcRect);
@@ -409,6 +414,20 @@ Editor::renderEntityPanel()
           }
           ImGui::Separator();
         }
+        if (_ecs.hasComponent<SpriteAnimator>(entity))
+        {
+          if (ImGui::CollapsingHeader("Animation", header))
+          {
+            drawSpriteAnimatorUI(entity);
+            ImGui::NewLine();
+            ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
+            if (ImGui::SmallButton(("Remove##SpriteAnimator" + std::to_string(entity)).c_str()))
+            {
+              _ecs.removeComponent<SpriteAnimator>(entity);
+            }
+            ImGui::Separator();
+          }
+        }
       }
 
       // === Add Component ===
@@ -440,6 +459,8 @@ Editor::renderEntityPanel()
 
         if (!_ecs.hasComponent<Sprite>(entity) && ImGui::MenuItem("Sprite"))
           _ecs.addComponent<Sprite>(entity, {});
+        if (!_ecs.hasComponent<SpriteAnimator>(entity) && ImGui::MenuItem("Animation"))
+          _ecs.addComponent<SpriteAnimator>(entity, {});
 
         ImGui::EndPopup();
       }
@@ -476,29 +497,30 @@ Editor::renderControls()
 
   if (ImGui::Button("Reset"))
   {
+    _world.getSceneManager().reset(_world.getECS());
   }
 
   ImGui::SameLine();
   ImGui::Separator();
   ImGui::SameLine();
 
-  static char sceneName[64] = "";
+  static char scenetextureId[64] = "";
   if (ImGui::Button("Save"))
   {
-    strcpy(sceneName, "");
+    strcpy(scenetextureId, "");
     ImGui::OpenPopup("Save Scene As");
   }
 
   if (ImGui::BeginPopupModal("Save Scene As", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
   {
-    ImGui::InputText("Name", sceneName, IM_ARRAYSIZE(sceneName));
+    ImGui::InputText("textureId", scenetextureId, IM_ARRAYSIZE(scenetextureId));
 
     if (ImGui::Button("Save", ImVec2(120, 0)))
     {
-      if (strlen(sceneName) > 0)
+      if (strlen(scenetextureId) > 0)
       {
         JSONSerializer serializer;
-        serializer.AddKeyValuePair("name", sceneName);
+        serializer.AddKeyValuePair("textureId", scenetextureId);
         serializer.StartArray("entities");
 
         auto& _ecs = _world.getECS();
@@ -529,7 +551,7 @@ Editor::renderControls()
 
         serializer.EndObject();
 
-        std::string filePath = std::string("scenes/") + sceneName + ".json";
+        std::string filePath = std::string("scenes/") + scenetextureId + ".json";
         serializer.saveToFile(filePath);
 
         ImGui::CloseCurrentPopup();
@@ -548,4 +570,130 @@ Editor::renderControls()
 
   ImGui::End();
   ImGui::PopStyleVar(2);
+}
+
+void
+Editor::drawSpriteAnimatorUI(Entity& e)
+{
+  auto& ecs      = _world.getECS();
+  auto& animator = ecs.getComponent<SpriteAnimator>(e);
+
+  if (ImGui::BeginCombo("Current Animation", animator.currentAnim.c_str()))
+  {
+    for (const auto& [name, _] : animator.animations)
+    {
+      bool isSelected = (name == animator.currentAnim);
+      if (ImGui::Selectable(name.c_str(), isSelected))
+      {
+        playAnimation(animator, name);
+      }
+      if (isSelected)
+        ImGui::SetItemDefaultFocus();
+    }
+    ImGui::EndCombo();
+  }
+
+  bool hasValidAnim = animator.animations.find(animator.currentAnim) != animator.animations.end();
+
+  if (!hasValidAnim && !animator.animations.empty())
+  {
+    animator.currentAnim = animator.animations.begin()->first;
+    hasValidAnim         = true;
+  }
+
+  if (hasValidAnim)
+  {
+    auto& animation = animator.animations[animator.currentAnim];
+    ImGui::InputInt("Animation Speed (ms/frame)", &animation.speed);
+    ImGui::SliderInt(
+        "Frame", &animator.currentFrame, 0, std::max(0, (int) animation.frames.size() - 1));
+
+    if (ImGui::Button("Restart Animation"))
+    {
+      animator.currentFrame = 0;
+      animator.timer        = 0.0f;
+    }
+
+    ImGui::Separator();
+    ImGui::Text("Frames");
+
+    auto&       frames = animation.frames;
+    ImTextureID texID  = (ImTextureID) _ctx.texture->getTexture(animation.textureId);
+
+    for (size_t i = 0; i < frames.size(); ++i)
+    {
+      ImGui::PushID((int) i);
+      if (ImGui::TreeNode(("Frame " + std::to_string(i)).c_str()))
+      {
+        ImGui::InputInt4("Rect", (int*) &frames[i].rect);
+        ImGui::DragFloat2("Offset", &frames[i].offset.x, 0.1f);
+
+        if (texID)
+        {
+          float previewSize = 64.0f;
+          int   texW = 1, texH = 1;
+          SDL_QueryTexture((SDL_Texture*) texID, nullptr, nullptr, &texW, &texH);
+
+          ImVec2 uv0 = { (float) frames[i].rect.x / texW, (float) frames[i].rect.y / texH };
+          ImVec2 uv1 = { (float) (frames[i].rect.x + frames[i].rect.w) / texW,
+                         (float) (frames[i].rect.y + frames[i].rect.h) / texH };
+
+          ImGui::Image(texID, ImVec2(previewSize, previewSize), uv0, uv1);
+        }
+
+        if (ImGui::Button("Remove Frame"))
+        {
+          frames.erase(frames.begin() + i);
+          ImGui::TreePop();
+          ImGui::PopID();
+          break;
+        }
+
+        ImGui::TreePop();
+      }
+      ImGui::PopID();
+    }
+
+    if (ImGui::Button("Add Frame"))
+    {
+      frames.emplace_back(SDL_Rect{ 0, 0, 16, 16 }, Vector2D{});
+    }
+  }
+  else
+  {
+    ImGui::TextColored(ImVec4(1, 0.6f, 0.2f, 1), "No animation selected.");
+    ImGui::Text("Create one below to get started.");
+  }
+
+  ImGui::Separator();
+
+  static char newAnimName[64]  = {};
+  static char newTextureId[64] = {};
+
+  ImGui::InputText("Animation Name", newAnimName, IM_ARRAYSIZE(newAnimName));
+  ImGui::InputText("Texture ID", newTextureId, IM_ARRAYSIZE(newTextureId));
+
+  if (ImGui::Button("Create Animation") && strlen(newAnimName) > 0 && strlen(newTextureId) > 0)
+  {
+    animator.animations[newAnimName] = Animation({}, 200, newTextureId);
+    animator.currentAnim             = newAnimName;
+
+    newAnimName[0]  = '\0';
+    newTextureId[0] = '\0';
+  }
+
+  ImGui::BeginDisabled(!hasValidAnim);
+  if (ImGui::Button("Delete Current Animation") && animator.animations.size() > 0)
+  {
+    animator.animations.erase(animator.currentAnim);
+    if (!animator.animations.empty())
+      animator.currentAnim = animator.animations.begin()->first;
+    else
+    {
+      animator.currentAnim.clear();
+      animator.currentFrame = 0;
+      animator.timer        = 0.0f;
+    }
+  }
+  ImGui::EndDisabled();
 }

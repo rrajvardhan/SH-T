@@ -100,7 +100,7 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
   style.GrabRounding      = 12.0f;
   style.ScrollbarRounding = 3.0f;
   style.ScrollbarSize     = 0.0f;
-  style.WindowRounding    = 12.0f;
+  style.WindowRounding    = 0.0f;
   style.TabRounding       = 12.0f;
 
   style.WindowBorderSize = 1.0f;

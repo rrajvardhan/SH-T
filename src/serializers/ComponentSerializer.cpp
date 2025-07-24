@@ -89,8 +89,8 @@ void
 Serialize(JSONSerializer& s, const Sprite& sp)
 {
   s.StartNewObject("Sprite")
-      .AddKeyValuePair("name", sp.name)
-      .StartNewObject("Rect")
+      .AddKeyValuePair("textureId", sp.textureId)
+      .StartNewObject("rect")
       .AddKeyValuePair("x", sp.srcRect.x)
       .AddKeyValuePair("y", sp.srcRect.y)
       .AddKeyValuePair("w", sp.srcRect.w)
@@ -175,11 +175,11 @@ Deserialize(const JSON& j, Renderable& r)
 void
 Deserialize(const JSON& j, Sprite& s)
 {
-  s.name      = j["name"];
-  s.srcRect.x = j["Rect"]["x"];
-  s.srcRect.y = j["Rect"]["y"];
-  s.srcRect.w = j["Rect"]["w"];
-  s.srcRect.h = j["Rect"]["h"];
+  s.textureId = j["textureId"];
+  s.srcRect.x = j["rect"]["x"];
+  s.srcRect.y = j["rect"]["y"];
+  s.srcRect.w = j["rect"]["w"];
+  s.srcRect.h = j["rect"]["h"];
   s.scale     = j["scale"];
   s.flip      = j["flip"];
   s.offset.x  = j["offset"]["x"];

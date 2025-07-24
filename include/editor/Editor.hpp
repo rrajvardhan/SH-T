@@ -22,6 +22,7 @@ public:
   void renderComponentInspector();
   void renderControls();
   void renderEntityPanel();
+  void drawSpriteAnimatorUI(Entity& e);
 
 private:
   bool _active = true;
