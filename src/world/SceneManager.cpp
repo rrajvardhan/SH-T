@@ -3,6 +3,7 @@
 #include "Log.hpp"
 #include "Overseer.hpp"
 #include "SceneManager.hpp"
+#include "SpriteComponents.hpp"
 #include <iostream>
 
 SceneManager::SceneManager()
@@ -92,6 +93,13 @@ SceneManager::loadScene(const std::string& path, Overseer& ecs)
       Identification id;
       ComponentSerializer::Deserialize(entityJson["Identification"], id);
       ecs.addComponent(e, id);
+    }
+
+    if (entityJson.contains("SpriteAnimator"))
+    {
+      SpriteAnimator sa;
+      ComponentSerializer::Deserialize(entityJson["SpriteAnimator"], sa);
+      ecs.addComponent(e, sa);
     }
   }
 

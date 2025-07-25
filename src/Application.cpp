@@ -3,6 +3,7 @@
 #include "ServiceContext.hpp"
 #include "World.hpp"
 #include <SDL2/SDL_scancode.h>
+#include <memory>
 
 bool
 Application::init()
@@ -22,7 +23,7 @@ Application::init(EngineConfig& cfg)
   _cfg = cfg;
   _ctx = _services.getContext();
 
-  _world = new World(_ctx);
+  _world = std::make_unique<World>(_ctx);
   if (!_world->init())
   {
     LOG_ERROR("[World] failed to initialize.");
@@ -32,7 +33,7 @@ Application::init(EngineConfig& cfg)
   _world->getCamera().setViewport(_ctx.graphics->getScreenWidth(),
                                   _ctx.graphics->getScreenHeight());
 
-  _editor = new Editor(*_world, _ctx);
+  _editor = std::make_unique<Editor>(*_world, _ctx);
 
   _running = true;
   LOG_SUCCESS("[Application] Initialized.");

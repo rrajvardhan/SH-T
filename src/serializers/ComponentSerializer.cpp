@@ -117,6 +117,47 @@ Serialize(JSONSerializer& s, const Identification& id)
 }
 
 void
+Serialize(JSONSerializer& s, const SpriteAnimator& animator)
+{
+  s.StartNewObject("SpriteAnimator")
+      .AddKeyValuePair("currentAnim", animator.currentAnim)
+      .AddKeyValuePair("currentFrame", animator.currentFrame)
+      .AddKeyValuePair("timer", animator.timer)
+      .StartArray("animations");
+
+  for (const auto& [name, anim] : animator.animations)
+  {
+    s.StartNewObject()
+        .AddKeyValuePair("name", name)
+        .AddKeyValuePair("textureId", anim.textureId)
+        .AddKeyValuePair("speed", anim.speed)
+        .StartArray("frames");
+
+    for (const auto& frame : anim.frames)
+    {
+      s.StartNewObject()
+          .StartNewObject("rect")
+          .AddKeyValuePair("x", frame.rect.x)
+          .AddKeyValuePair("y", frame.rect.y)
+          .AddKeyValuePair("w", frame.rect.w)
+          .AddKeyValuePair("h", frame.rect.h)
+          .EndObject()
+          .StartNewObject("offset")
+          .AddKeyValuePair("x", frame.offset.x)
+          .AddKeyValuePair("y", frame.offset.y)
+          .EndObject()
+          .EndObject();
+    }
+
+    s.EndArray() // frames
+        .EndObject();
+  }
+
+  s.EndArray() // animations
+      .EndObject();
+}
+
+void
 Deserialize(const JSON& j, Transform& t)
 {
   t.position.x = j["position"]["x"];
@@ -193,5 +234,38 @@ Deserialize(const JSON& j, Identification& id)
 {
   id.name  = j["name"];
   id.group = j["group"];
+}
+
+void
+Deserialize(const JSON& j, SpriteAnimator& animator)
+{
+  animator.currentAnim  = j.value("currentAnim", "");
+  animator.currentFrame = j.value("currentFrame", 0);
+  animator.timer        = j.value("timer", 0.0f);
+
+  for (const auto& animJson : j["animations"])
+  {
+    Animation anim;
+    anim.textureId = animJson["textureId"];
+    anim.speed     = animJson["speed"];
+
+    for (const auto& frameJson : animJson["frames"])
+    {
+      SDL_Rect r;
+      r.x = frameJson["rect"]["x"];
+      r.y = frameJson["rect"]["y"];
+      r.w = frameJson["rect"]["w"];
+      r.h = frameJson["rect"]["h"];
+
+      Vector2D offset;
+      offset.x = frameJson["offset"]["x"];
+      offset.y = frameJson["offset"]["y"];
+
+      anim.frames.emplace_back(r, offset);
+    }
+
+    std::string name          = animJson["name"];
+    animator.animations[name] = anim;
+  }
 }
 }

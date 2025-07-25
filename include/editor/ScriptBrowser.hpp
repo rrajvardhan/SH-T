@@ -9,7 +9,7 @@
 class ScriptBrowser
 {
 public:
-  ScriptBrowser(const std::string& assetDir, GlobalScriptSystem& scripts);
+  ScriptBrowser(const std::string& scriptDir, GlobalScriptSystem& scripts);
   void draw();
 
 private:
@@ -20,7 +20,7 @@ private:
   TextEditor          _textEditor;
   GlobalScriptSystem& _scripts;
 
-  std::string              _assetDir;
+  std::string              _scriptDir;
   std::vector<std::string> _scriptIDs;
 
   int         _selectedIndex = -1;

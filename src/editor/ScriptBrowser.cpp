@@ -6,13 +6,16 @@
 #include <iostream>
 #include <string>
 
-ScriptBrowser::ScriptBrowser(const std::string& assetDir, GlobalScriptSystem& scripts)
-    : _scripts(scripts), _assetDir(assetDir)
+ScriptBrowser::ScriptBrowser(const std::string& scriptDir, GlobalScriptSystem& scripts)
+    : _scripts(scripts), _scriptDir(scriptDir)
 {
   auto lang = TextEditor::LanguageDefinition::Lua();
   _textEditor.SetLanguageDefinition(lang);
   _textEditor.SetShowWhitespaces(false);
   _textEditor.SetText(_scriptContent);
+
+  _scripts.loadScript(scriptDir + "/main.lua");
+  loadScripts();
 }
 
 std::string
@@ -42,7 +45,7 @@ ScriptBrowser::loadScripts()
 {
   _scriptIDs.clear();
 
-  for (const auto& file : std::filesystem::directory_iterator(_assetDir))
+  for (const auto& file : std::filesystem::directory_iterator(_scriptDir))
   {
     if (!file.is_regular_file())
       continue;
@@ -83,7 +86,7 @@ ScriptBrowser::draw()
     {
       std::string srcPath  = ImGuiFileDialog::Instance()->GetFilePathName();
       std::string filename = ImGuiFileDialog::Instance()->GetCurrentFileName();
-      std::string destPath = _assetDir + "/" + filename;
+      std::string destPath = _scriptDir + "/" + filename;
 
       copyToAssetFolder(srcPath, destPath);
       _loaded = false;
@@ -101,7 +104,7 @@ ScriptBrowser::draw()
     ImGui::InputText("##ScriptName", newScriptName, sizeof(newScriptName));
     if (ImGui::Button("Create"))
     {
-      std::string newPath = _assetDir + "/" + newScriptName;
+      std::string newPath = _scriptDir + "/" + newScriptName;
       if (!std::filesystem::exists(newPath))
       {
         std::ofstream file(newPath);
@@ -132,7 +135,7 @@ ScriptBrowser::draw()
       _selectedIndex  = i;
       _selectedScript = script;
 
-      std::ifstream file(_assetDir + "/" + script);
+      std::ifstream file(_scriptDir + "/" + script);
       _scriptContent
           = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
       _textEditor.SetText(_scriptContent);
@@ -149,7 +152,7 @@ ScriptBrowser::draw()
 
       if (ImGui::Selectable("Delete"))
       {
-        std::filesystem::remove(_assetDir + "/" + script);
+        std::filesystem::remove(_scriptDir + "/" + script);
         if (_selectedIndex == i)
         {
           _selectedScript.clear();
@@ -171,9 +174,9 @@ ScriptBrowser::draw()
                            sizeof(_renameBuffer),
                            ImGuiInputTextFlags_EnterReturnsTrue))
       {
-        std::string oldPath = _assetDir + "/" + script;
+        std::string oldPath = _scriptDir + "/" + script;
         std::string newName = _renameBuffer;
-        std::string newPath = _assetDir + "/" + newName;
+        std::string newPath = _scriptDir + "/" + newName;
 
         if (newName != script && !std::filesystem::exists(newPath))
         {
@@ -207,7 +210,7 @@ ScriptBrowser::draw()
 
   if (!_selectedScript.empty())
   {
-    const std::string filename = _assetDir + "/" + _selectedScript;
+    const std::string filename = _scriptDir + "/" + _selectedScript;
     ImGui::Text("%s", _selectedScript.c_str());
 
     ImGui::SameLine(ImGui::GetContentRegionAvail().x - 50);

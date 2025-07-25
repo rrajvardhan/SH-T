@@ -26,6 +26,8 @@ void
 Serialize(JSONSerializer& s, const Sprite& sp);
 void
 Serialize(JSONSerializer& s, const Identification& id);
+void
+Serialize(JSONSerializer& s, const SpriteAnimator& animation);
 
 void
 Deserialize(const JSON& j, Transform& t);
@@ -43,4 +45,6 @@ void
 Deserialize(const JSON& j, Sprite& sp);
 void
 Deserialize(const JSON& j, Identification& id);
+void
+Deserialize(const JSON& j, SpriteAnimator& animation);
 }

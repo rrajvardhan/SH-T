@@ -27,6 +27,7 @@ copyToAssetFolder(const std::string& srcPath, const std::string& destPath)
 TextureBrowser::TextureBrowser(TextureManager* textureManager, const std::string& assetDir)
     : _textureManager(textureManager), _assetDir(assetDir)
 {
+  loadTextures();
 }
 
 void

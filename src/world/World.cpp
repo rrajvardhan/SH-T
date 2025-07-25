@@ -59,44 +59,7 @@ World::init()
   LuaBindings::bindSceneManager(lua, *_sceneManager, _ecs);
   LuaBindings::bindAnimation(lua, _ecs);
 
-  _globalScript->loadScript("scripts/main.lua");
-  _sceneManager->loadScene("scenes/test.json", _ecs);
-
   _eventbus.subscribe(_globalScript.get(), &GlobalScriptSystem::onCollision);
-
-  Entity player = _ecs.createEntity();
-  _ecs.addComponent(player, Transform{ { 0.0f, 100.0f } });
-  _ecs.addComponent(player, RigidBody{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 1.0f });
-  _ecs.addComponent(player, Force{ { 0.0f, 2000.0f } });
-  _ecs.addComponent(player, Collider{ { 90.0f, 90.0f } });
-  _ecs.addComponent(player,
-                    Sprite{ .textureId = "bird", .srcRect = { 0, 16, 16, 16 }, .scale = 5.0f });
-  _ecs.addComponent(player, Identification{ "bird", "bird" });
-  _ecs.addComponent(player, FollowCamera{ true });
-  SpriteAnimator animator;
-  animator.animations["idle"] = Animation(
-      {
-          AnimationFrame({ 0, 0, 16, 16 }),
-          AnimationFrame({ 16, 0, 16, 16 }),
-      },
-      500,
-      "bird");
-  animator.animations["fly"] = Animation(
-      {
-          AnimationFrame({ 16 * 0, 16, 16, 16 }),
-          AnimationFrame({ 16 * 1, 16, 16, 16 }),
-          AnimationFrame({ 16 * 2, 16, 16, 16 }),
-          AnimationFrame({ 16 * 3, 16, 16, 16 }),
-          AnimationFrame({ 16 * 4, 16, 16, 16 }),
-          AnimationFrame({ 16 * 5, 16, 16, 16 }),
-          AnimationFrame({ 16 * 6, 16, 16, 16 }),
-          AnimationFrame({ 16 * 7, 16, 16, 16 }),
-      },
-      150,
-      "bird");
-
-  playAnimation(animator, "fly");
-  _ecs.addComponent(player, animator);
 
   return true;
 }

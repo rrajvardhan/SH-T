@@ -33,7 +33,7 @@ private:
 
   Entity _selected = INVALID_ENTITY;
 
-  TextureBrowser* _btexture;
-  ScriptBrowser*  _bscript;
-  AudioBrowser*   _baudio;
+  std::unique_ptr<TextureBrowser> _btexture;
+  std::unique_ptr<ScriptBrowser>  _bscript;
+  std::unique_ptr<AudioBrowser>   _baudio;
 };

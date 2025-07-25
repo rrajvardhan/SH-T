@@ -3,7 +3,6 @@
 #include "ComponentSerializer.hpp"
 #include "Editor.hpp"
 #include "JsonSerializer.hpp"
-#include "Log.hpp"
 #include "PhysicsComponents.hpp"
 #include "RenderableComponents.hpp"
 #include "ServiceContext.hpp"
@@ -504,23 +503,23 @@ Editor::renderControls()
   ImGui::Separator();
   ImGui::SameLine();
 
-  static char scenetextureId[64] = "";
+  static char sceneName[64] = "";
   if (ImGui::Button("Save"))
   {
-    strcpy(scenetextureId, "");
+    strcpy(sceneName, "");
     ImGui::OpenPopup("Save Scene As");
   }
 
   if (ImGui::BeginPopupModal("Save Scene As", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
   {
-    ImGui::InputText("textureId", scenetextureId, IM_ARRAYSIZE(scenetextureId));
+    ImGui::InputText("textureId", sceneName, IM_ARRAYSIZE(sceneName));
 
     if (ImGui::Button("Save", ImVec2(120, 0)))
     {
-      if (strlen(scenetextureId) > 0)
+      if (strlen(sceneName) > 0)
       {
         JSONSerializer serializer;
-        serializer.AddKeyValuePair("textureId", scenetextureId);
+        serializer.AddKeyValuePair("name", sceneName);
         serializer.StartArray("entities");
 
         auto& _ecs = _world.getECS();
@@ -545,13 +544,15 @@ Editor::renderControls()
             ComponentSerializer::Serialize(serializer, _ecs.getComponent<Renderable>(entity));
           if (_ecs.hasComponent<Identification>(entity))
             ComponentSerializer::Serialize(serializer, _ecs.getComponent<Identification>(entity));
+          if (_ecs.hasComponent<SpriteAnimator>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<SpriteAnimator>(entity));
 
           serializer.EndObject();
         }
 
         serializer.EndObject();
 
-        std::string filePath = std::string("scenes/") + scenetextureId + ".json";
+        std::string filePath = std::string("scenes/") + sceneName + ".json";
         serializer.saveToFile(filePath);
 
         ImGui::CloseCurrentPopup();

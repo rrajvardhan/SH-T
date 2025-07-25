@@ -28,6 +28,6 @@ private:
   SDL_Event _event;
   bool      _running = false;
 
-  World*  _world  = nullptr;
-  Editor* _editor = nullptr;
+  std::unique_ptr<World>  _world;
+  std::unique_ptr<Editor> _editor;
 };

@@ -111,9 +111,11 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
   ImGui_ImplSDL2_InitForSDLRenderer(_ctx.graphics->getWindow(), _ctx.graphics->getRenderer());
   ImGui_ImplSDLRenderer2_Init(_ctx.graphics->getRenderer());
 
-  _btexture = new TextureBrowser(ctx.texture, "assets/textures");
-  _bscript  = new ScriptBrowser("scripts", world.getScriptSystem());
-  _baudio   = new AudioBrowser("assets/sounds", *ctx.audio);
+  _btexture = std::make_unique<TextureBrowser>(ctx.texture, "assets/textures");
+  _bscript  = std::make_unique<ScriptBrowser>("scripts", world.getScriptSystem());
+  _baudio   = std::make_unique<AudioBrowser>("assets/sounds", *ctx.audio);
+
+  _world.getSceneManager().loadScene("scenes/default.json", _world.getECS());
 }
 
 void
