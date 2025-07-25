@@ -10,8 +10,8 @@ CXX := g++
 BUILD_DIR := build
 BIN := $(BUILD_DIR)/main
 ASSETS_DST := $(BUILD_DIR)/assets
-SRC_DIR := src
 OBJ_DIR := $(BUILD_DIR)/obj
+SRC_DIR := src
 INC_DIR := include
 
 # === Compilation Flags ===
@@ -33,10 +33,6 @@ CFLAGS := -g -Wall -Wextra -std=c++17 \
   -I$(INC_DIR)/external/imgui \
   -I$(INC_DIR)/external/imgui/backends \
   -I$(INC_DIR)/external/sol/ \
-  -I$(INC_DIR)/external/sol/compatibility \
-  -I$(INC_DIR)/external/sol/detail \
-  -I$(INC_DIR)/external/sol/stack \
-  -I$(INC_DIR)/external/sol/utility \
 
 LDFLAGS := -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -llua
 

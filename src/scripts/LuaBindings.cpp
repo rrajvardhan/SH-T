@@ -10,26 +10,21 @@
 #include "SpriteComponents.hpp"
 #include "Timer.hpp"
 #include "Types.hpp"
+#include "UtilComponents.hpp"
 #include "Vector2D.hpp"
+#include "sol/raii.hpp"
 
 namespace LuaBindings
 {
 
 void
-bindVector2D(sol::state& lua)
+bindECSCore(sol::state& lua, Overseer& ecs)
 {
-  lua.new_usertype<Vector2D>("Vector2D",
-                             sol::constructors<Vector2D(), Vector2D(float, float)>(),
-                             "x",
-                             &Vector2D::x,
-                             "y",
-                             &Vector2D::y);
-}
+  // Vector2D
+  lua.new_usertype<Vector2D>(
+      "Vector2D", sol::constructors<Vector2D()>(), "x", &Vector2D::x, "y", &Vector2D::y);
 
-void
-bindTransform(sol::state& lua, Overseer& ecs)
-{
-
+  // Transform
   lua.new_usertype<Transform>("Transform",
                               sol::constructors<Transform()>(),
                               "position",
@@ -37,41 +32,40 @@ bindTransform(sol::state& lua, Overseer& ecs)
                               "rotation",
                               &Transform::rotation);
 
-  lua.set_function("get_transform",
-                   [&ecs](Entity e) -> Transform* { return &ecs.getComponent<Transform>(e); });
+  // RigidBody
+  lua.new_usertype<RigidBody>("RigidBody",
+                              sol::constructors<RigidBody()>(),
+                              "velocity",
+                              &RigidBody::velocity,
+                              "acceleration",
+                              &RigidBody::acceleration,
+                              "mass",
+                              &RigidBody::mass);
 
-  lua.set_function("add_transform", [&ecs](Entity e) { ecs.addComponent(e, Transform{}); });
+  // Force
+  lua.new_usertype<Force>("Force", sol::constructors<Force()>(), "vector", &Force::vector);
 
-  lua.set_function("remove_transform", [&ecs](Entity e) { ecs.removeComponent<Transform>(e); });
-}
+  // Collider
+  lua.new_usertype<Collider>("Collider",
+                             sol::constructors<Collider()>(),
+                             "size",
+                             &Collider::size,
+                             "offset",
+                             &Collider::offset,
+                             "static",
+                             &Collider::isStatic);
 
-void
-bindForce(sol::state& lua, Overseer& ecs)
-{
-  lua.new_usertype<Force>("Force", "vector", &Force::vector);
+  // Collider
+  lua.new_usertype<Identification>("Identification",
+                                   sol::constructors<Identification()>(),
+                                   "name",
+                                   &Identification::name,
+                                   "group",
+                                   &Identification::group);
 
-  lua.set_function("get_force", [&ecs](Entity e) -> Force* { return &ecs.getComponent<Force>(e); });
-
-  lua.set_function("add_force", [&ecs](Entity e) { ecs.addComponent(e, Force{}); });
-
-  lua.set_function("remove_force", [&ecs](Entity e) { ecs.removeComponent<Force>(e); });
-}
-
-void
-bindFollowCamera(sol::state& lua, Overseer& ecs)
-{
-
-  lua.new_usertype<FollowCamera>("FollowCamera", "isActive", &FollowCamera::isActive);
-
-  lua.set_function("get_follow_camera",
-                   [&ecs](Entity e) -> FollowCamera*
-                   { return &ecs.getComponent<FollowCamera>(e); });
-
-  lua.set_function("add_follow_camera",
-                   [&ecs](Entity e) { ecs.addComponent(e, FollowCamera{ true }); });
-
-  lua.set_function("remove_follow_camera",
-                   [&ecs](Entity e) { ecs.removeComponent<FollowCamera>(e); });
+  // FollowCamera
+  lua.new_usertype<FollowCamera>(
+      "FollowCamera", sol::constructors<FollowCamera()>(), "isActive", &FollowCamera::isActive);
 
   lua.set_function("set_follow_camera",
                    [&ecs](Entity entity, bool state)
@@ -92,42 +86,22 @@ bindFollowCamera(sol::state& lua, Overseer& ecs)
 }
 
 void
-bindCollider(sol::state& lua, Overseer& ecs)
+bindEntityLookup(sol::state& lua, Overseer& ecs)
 {
-
-  lua.new_usertype<Collider>("Collider",
-                             "size",
-                             &Collider::size,
-                             "offset",
-                             &Collider::offset,
-                             "static",
-                             &Collider::isStatic);
-
-  lua.set_function("get_collider",
-                   [&ecs](Entity e) -> Collider* { return &ecs.getComponent<Collider>(e); });
-
-  lua.set_function("add_collider", [&ecs](Entity e) { ecs.addComponent(e, Collider{}); });
-
-  lua.set_function("remove_collider", [&ecs](Entity e) { ecs.removeComponent<Collider>(e); });
-}
-
-void
-bindRigidBody(sol::state& lua, Overseer& ecs)
-{
-  lua.new_usertype<RigidBody>("RigidBody",
-                              "velocity",
-                              &RigidBody::velocity,
-                              "acceleration",
-                              &RigidBody::acceleration,
-                              "mass",
-                              &RigidBody::mass);
-
-  lua.set_function("get_rigidbody",
-                   [&ecs](Entity e) -> RigidBody* { return &ecs.getComponent<RigidBody>(e); });
-
-  lua.set_function("add_rigidbody", [&ecs](Entity e) { ecs.addComponent(e, RigidBody{}); });
-
-  lua.set_function("remove_rigidbody", [&ecs](Entity e) { ecs.removeComponent<RigidBody>(e); });
+  lua.set_function("find_entity_by_name",
+                   [&lua, &ecs](const std::string& name) -> sol::object
+                   {
+                     for (auto e : ecs.getEntities())
+                     {
+                       if (ecs.hasComponent<Identification>(e))
+                       {
+                         const auto& id = ecs.getComponent<Identification>(e);
+                         if (id.name == name)
+                           return sol::make_object(lua, e);
+                       }
+                     }
+                     return sol::nil;
+                   });
 }
 
 void
@@ -195,15 +169,35 @@ bindKeyConstants(sol::state& lua)
 void
 bindInput(sol::state& lua, InputManager& input)
 {
-
   lua.new_usertype<InputManager>("InputManager",
                                  "key_down",
                                  &InputManager::keyDown,
                                  "key_pressed",
                                  &InputManager::keyPressed,
                                  "key_released",
-                                 &InputManager::keyReleased);
+                                 &InputManager::keyReleased,
+                                 "mouse_down",
+                                 &InputManager::mouseDown,
+                                 "mouse_pressed",
+                                 &InputManager::mousePressed,
+                                 "mouse_released",
+                                 &InputManager::mouseReleased,
+                                 "mouse_pos",
+                                 &InputManager::mousePos);
+
   lua["Input"] = &input;
+
+  lua.new_enum("MOUSE_BUTTON",
+               "left",
+               InputManager::MOUSE_BUTTON::left,
+               "right",
+               InputManager::MOUSE_BUTTON::right,
+               "middle",
+               InputManager::MOUSE_BUTTON::middle,
+               "back",
+               InputManager::MOUSE_BUTTON::back,
+               "forward",
+               InputManager::MOUSE_BUTTON::forward);
 }
 
 void
@@ -281,8 +275,10 @@ bindCamera2D(sol::state& lua, Camera2D& camera2D)
 void
 bindSceneManager(sol::state& lua, SceneManager& sceneManager, Overseer& ecs)
 {
+  lua.set_function("add_scene", [&](const std::string& path) { sceneManager.addScene(path); });
+
   lua.set_function("load_scene",
-                   [&](const std::string& path) { sceneManager.loadScene(path, ecs); });
+                   [&](const std::string& name) { sceneManager.loadScene(name, ecs); });
 }
 
 void

@@ -115,7 +115,8 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
   _bscript  = std::make_unique<ScriptBrowser>("scripts", world.getScriptSystem());
   _baudio   = std::make_unique<AudioBrowser>("assets/sounds", *ctx.audio);
 
-  _world.getSceneManager().loadScene("scenes/default.json", _world.getECS());
+  _world.getSceneManager().addScene("scenes/default.json");
+  _world.getSceneManager().loadScene("default", _world.getECS());
 }
 
 void

@@ -86,6 +86,16 @@ public:
     _systemManager->setSignature<T>(signature);
   }
 
+  void clearEntities()
+  {
+    auto&               entities = _entityManager->getLivingEntities();
+    std::vector<Entity> toDestroy(entities.begin(), entities.end());
+    for (Entity e : toDestroy)
+    {
+      destroyEntity(e);
+    }
+  }
+
 private:
   std::unique_ptr<ComponentManager> _componentManager;
   std::unique_ptr<EntityManager>    _entityManager;

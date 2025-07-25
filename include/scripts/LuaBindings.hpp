@@ -12,29 +12,21 @@ class Overseer;
 
 namespace LuaBindings
 {
+
+template <typename T>
 void
-bindTransform(sol::state& lua, Overseer& ecs);
+bindECSComponent(sol::state& lua, Overseer& ecs, const std::string& name)
+{
+  lua.set_function("get_" + name, [&ecs](Entity e) -> T* { return &ecs.getComponent<T>(e); });
+  lua.set_function("add_" + name, [&ecs](Entity e) { ecs.addComponent(e, T{}); });
+  lua.set_function("remove_" + name, [&ecs](Entity e) { ecs.removeComponent<T>(e); });
+}
 
 void
-bindVector2D(sol::state& lua);
+bindECSCore(sol::state& lua, Overseer& ecs);
 
 void
-bindRigigBody(sol::state& lua, Overseer& ecs);
-
-void
-bindForce(sol::state& lua, Overseer& ecs);
-
-void
-bindFollowCamera(sol::state& lua, Overseer& ecs);
-
-void
-bindCollider(sol::state& lua, Overseer& ecs);
-
-void
-bindCamera2D(sol::state& lua, Camera2D& camera);
-
-void
-bindRigidBody(sol::state& lua, Overseer& ecs);
+bindEntityLookup(sol::state& lua, Overseer& ecs);
 
 void
 bindKeyConstants(sol::state& lua);

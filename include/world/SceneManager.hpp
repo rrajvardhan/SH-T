@@ -1,7 +1,15 @@
 #pragma once
 
+#include "Json.hpp"
 #include "Overseer.hpp"
 #include <string>
+
+struct Scene
+{
+  std::string name;
+  std::string path;
+  JSON        data;
+};
 
 class SceneManager
 {
@@ -10,18 +18,15 @@ public:
   ~SceneManager();
 
   void loadScene(const std::string& path, Overseer& ecs);
-  void reset(Overseer& ecs) { loadScene(_currentScene, ecs); }
-  void clearAll(Overseer& ecs)
+  bool addScene(const std::string& path);
+  void reset(Overseer& ecs)
   {
-    std::vector<Entity> toDestroy;
-    for (Entity e : ecs.getEntities())
-      toDestroy.push_back(e);
-    for (Entity e : toDestroy)
-      ecs.destroyEntity(e);
+    if (_currentScene.name.empty())
+      return;
+    loadScene(_currentScene.name, ecs);
   }
 
-  const std::string& getCurrentScene() const { return _currentScene; }
-
 private:
-  std::string _currentScene;
+  Scene                                  _currentScene;
+  std::unordered_map<std::string, Scene> _sceneCache;
 };

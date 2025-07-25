@@ -14,10 +14,8 @@ public:
   GlobalScriptSystem();
 
   void        update();
-  void        bind(Overseer& ecs);
   void        loadScript(const std::string& path);
   void        reload();
-  void        reload(std::string& path);
   sol::state& getLuaState() { return _lua; }
 
   void onCollision(CollisionEvent* e);

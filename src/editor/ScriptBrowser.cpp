@@ -14,8 +14,8 @@ ScriptBrowser::ScriptBrowser(const std::string& scriptDir, GlobalScriptSystem& s
   _textEditor.SetShowWhitespaces(false);
   _textEditor.SetText(_scriptContent);
 
-  _scripts.loadScript(scriptDir + "/main.lua");
   loadScripts();
+  _scripts.loadScript(scriptDir + "/main.lua");
 }
 
 std::string

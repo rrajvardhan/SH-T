@@ -43,22 +43,29 @@ World::init()
 
   registerMainSystems();
 
-  _globalScript->bind(_ecs);
+  // Lua Bindings
   auto& lua = _globalScript->getLuaState();
+  // Components
+  LuaBindings::bindECSCore(lua, _ecs);
+  LuaBindings::bindECSComponent<Transform>(lua, _ecs, "transform");
+  LuaBindings::bindECSComponent<Collider>(lua, _ecs, "collider");
+  LuaBindings::bindECSComponent<RigidBody>(lua, _ecs, "rigidbody");
+  LuaBindings::bindECSComponent<Force>(lua, _ecs, "force");
+  LuaBindings::bindECSComponent<FollowCamera>(lua, _ecs, "follow_camera");
+  LuaBindings::bindECSComponent<Identification>(lua, _ecs, "id");
 
-  LuaBindings::bindVector2D(lua);
-  LuaBindings::bindTransform(lua, _ecs);
-  LuaBindings::bindFollowCamera(lua, _ecs);
-  LuaBindings::bindCollider(lua, _ecs);
-  LuaBindings::bindRigidBody(lua, _ecs);
+  LuaBindings::bindEntityLookup(lua, _ecs);
+  // Services
   LuaBindings::bindKeyConstants(lua);
   LuaBindings::bindInput(lua, *_provider.service.input);
   LuaBindings::bindTimer(lua, *_provider.service.timer);
   LuaBindings::bindAudio(lua, *_provider.service.audio);
+
   LuaBindings::bindCamera2D(lua, getCamera());
   LuaBindings::bindSceneManager(lua, *_sceneManager, _ecs);
   LuaBindings::bindAnimation(lua, _ecs);
 
+  // ECS Event Bus
   _eventbus.subscribe(_globalScript.get(), &GlobalScriptSystem::onCollision);
 
   return true;

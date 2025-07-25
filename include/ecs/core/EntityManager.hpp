@@ -61,7 +61,7 @@ public:
   Signature getSignature(Entity entity)
   {
 
-    if (entity > MAX_ENTITIES)
+    if (entity >= MAX_ENTITIES)
     {
       LOG_DEBUG("[EntityManager] Entity out of range!!");
     }

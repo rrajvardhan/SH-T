@@ -1,20 +1,13 @@
 #include "CollisionEvents.hpp"
 #include "GlobalScriptSystem.hpp"
 #include "Log.hpp"
-#include "LuaBindings.hpp"
-#include "Overseer.hpp"
 
 GlobalScriptSystem::GlobalScriptSystem()
 {
   _lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::math, sol::lib::string);
   _lua.script(R"(package.path = "scripts/?.lua;" .. package.path)");
-}
 
-void
-GlobalScriptSystem::bind(Overseer& ecs)
-{
-  _ecs = &ecs;
-
+  // Lua Event Bus
   _lua.set_function("subscribe_event",
                     [this](const std::string& eventName, sol::function cb)
                     { subscribe_lua(eventName, cb); });

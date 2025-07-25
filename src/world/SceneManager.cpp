@@ -4,7 +4,6 @@
 #include "Overseer.hpp"
 #include "SceneManager.hpp"
 #include "SpriteComponents.hpp"
-#include <iostream>
 
 SceneManager::SceneManager()
 {
@@ -14,16 +13,18 @@ SceneManager::~SceneManager()
 {
 }
 
-void
-SceneManager::loadScene(const std::string& path, Overseer& ecs)
+bool
+SceneManager::addScene(const std::string& path)
 {
-  clearAll(ecs);
+
+  if (_sceneCache.find(path) != _sceneCache.end())
+    return true;
 
   std::ifstream inFile(path);
   if (!inFile.is_open())
   {
-    std::cerr << "Failed to open scene file: " << path << '\n';
-    return;
+    LOG_DEBUG(" [SceneManager] Failed to open scene file: ", path);
+    return false;
   }
 
   JSON root;
@@ -31,9 +32,28 @@ SceneManager::loadScene(const std::string& path, Overseer& ecs)
 
   if (!root.contains("entities") || !root["entities"].is_array())
   {
-    std::cerr << "Scene file missing 'entities' array\n";
-    return;
+    LOG_ERROR("[SceneManager] Scene file missing 'entities' array: ", path);
+    return false;
   }
+
+  Scene scene;
+  scene.path = path;
+  scene.name = root.value("name", "<unnamed>");
+  scene.data = root;
+
+  _sceneCache[scene.name] = scene;
+
+  LOG_INFO("[SceneManager] Scene'", scene.name, "' added to cache.");
+  return true;
+}
+
+void
+SceneManager::loadScene(const std::string& name, Overseer& ecs)
+{
+  ecs.clearEntities();
+
+  const Scene& scene = _sceneCache.at(name);
+  const JSON&  root  = scene.data;
 
   for (const auto& entityJson : root["entities"])
   {
@@ -103,7 +123,7 @@ SceneManager::loadScene(const std::string& path, Overseer& ecs)
     }
   }
 
-  _currentScene = path;
+  _currentScene = scene;
 
-  LOG_INFO("Scene '", root.value("name", "<unnamed>"), "' loaded.\n");
+  LOG_INFO("[SceneManager] Scene '", root.value("name", "<unnamed>"), "' loaded.");
 }

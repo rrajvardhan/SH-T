@@ -8,6 +8,8 @@ CompileFlags:
     - -Iinclude/ecs/components
     - -Iinclude/ecs/events
     - -Iinclude/external
+    - -Iinclude/external/imgui
+    - -Iinclude/external/imgui/backends
     - -Iinclude/utils
     - -Iinclude/scripts
     - -Iinclude/editor
