@@ -28,6 +28,7 @@ TextureBrowser::TextureBrowser(TextureManager* textureManager, const std::string
     : _textureManager(textureManager), _assetDir(assetDir)
 {
   loadTextures();
+  _loaded = true;
 }
 
 void

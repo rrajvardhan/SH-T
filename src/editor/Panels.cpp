@@ -496,7 +496,7 @@ Editor::renderControls()
 
   if (ImGui::Button("Reset"))
   {
-    _world.getSceneManager().reset(_world.getECS());
+    _world.getSceneManager().reset();
   }
 
   ImGui::SameLine();
@@ -504,15 +504,22 @@ Editor::renderControls()
   ImGui::SameLine();
 
   static char sceneName[64] = "";
+
   if (ImGui::Button("Save"))
   {
-    strcpy(sceneName, "");
+    std::string current = _world.getSceneManager().getCurrentScene().name;
+    if (!current.empty())
+      strncpy(sceneName, current.c_str(), sizeof(sceneName));
+    else
+      strcpy(sceneName, "");
+    sceneName[sizeof(sceneName) - 1] = '\0';
+
     ImGui::OpenPopup("Save Scene As");
   }
 
   if (ImGui::BeginPopupModal("Save Scene As", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
   {
-    ImGui::InputText("textureId", sceneName, IM_ARRAYSIZE(sceneName));
+    ImGui::InputText("Name##Scene", sceneName, IM_ARRAYSIZE(sceneName));
 
     if (ImGui::Button("Save", ImVec2(120, 0)))
     {
@@ -523,7 +530,6 @@ Editor::renderControls()
         serializer.StartArray("entities");
 
         auto& _ecs = _world.getECS();
-
         for (Entity entity : _ecs.getEntities())
         {
           serializer.StartNewObject();
@@ -554,6 +560,8 @@ Editor::renderControls()
 
         std::string filePath = std::string("scenes/") + sceneName + ".json";
         serializer.saveToFile(filePath);
+
+        _bscene->reload();
 
         ImGui::CloseCurrentPopup();
       }

@@ -18,7 +18,7 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
 
   io.FontGlobalScale = 1.0f;
   io.Fonts->Clear();
-  ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 20.0f);
+  ImFont* customFont = io.Fonts->AddFontFromFileTTF("assets/default.ttf", 24.0f);
   if (!customFont)
   {
     LOG_ERROR("[Editor] Failed to load default font!");
@@ -114,9 +114,7 @@ Editor::Editor(World& world, ServiceContext& ctx) : _world(world), _ctx(ctx)
   _btexture = std::make_unique<TextureBrowser>(ctx.texture, "assets/textures");
   _bscript  = std::make_unique<ScriptBrowser>("scripts", world.getScriptSystem());
   _baudio   = std::make_unique<AudioBrowser>("assets/sounds", *ctx.audio);
-
-  _world.getSceneManager().addScene("scenes/default.json");
-  _world.getSceneManager().loadScene("default", _world.getECS());
+  _bscene   = std::make_unique<SceneBrowser>("scenes", _world.getSceneManager());
 }
 
 void
@@ -155,6 +153,7 @@ Editor::render()
   _bscript->draw();
   _baudio->draw();
   _btexture->draw();
+  _bscene->draw();
 
   if (_showImguiEditor)
   {

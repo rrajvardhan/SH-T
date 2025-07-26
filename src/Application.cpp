@@ -112,10 +112,6 @@ Application::capFPS()
 void
 Application::processInput()
 {
-  if (_ctx.input->keyDown(SDL_SCANCODE_F12))
-  {
-    _running = false;
-  }
 }
 
 void

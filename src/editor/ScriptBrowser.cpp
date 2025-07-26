@@ -16,6 +16,7 @@ ScriptBrowser::ScriptBrowser(const std::string& scriptDir, GlobalScriptSystem& s
 
   loadScripts();
   _scripts.loadScript(scriptDir + "/main.lua");
+  _loaded = true;
 }
 
 std::string

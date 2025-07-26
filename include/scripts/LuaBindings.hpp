@@ -44,7 +44,7 @@ void
 bindCamera2D(sol::state& lua, Camera2D& camera2D);
 
 void
-bindSceneManager(sol::state& lua, SceneManager& sceneManager, Overseer& ecs);
+bindSceneManager(sol::state& lua, SceneManager& sceneManager);
 
 void
 bindAnimation(sol::state& lua, Overseer& ecs);

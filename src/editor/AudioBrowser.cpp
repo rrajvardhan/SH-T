@@ -11,6 +11,8 @@
 AudioBrowser::AudioBrowser(const std::string& assetDir, AudioManager& audioManager)
     : _assetDir(assetDir), _audioManager(audioManager)
 {
+  loadAudioFiles();
+  _loaded = true;
 }
 
 void

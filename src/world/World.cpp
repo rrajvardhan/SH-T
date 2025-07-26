@@ -18,8 +18,6 @@
 
 World::World(ServiceContext& ctx) : _camera(), _ctx(ctx), _provider(ctx, _camera, _eventbus)
 {
-  _sceneManager = std::make_unique<SceneManager>();
-  _globalScript = std::make_unique<GlobalScriptSystem>();
 }
 
 World::~World()
@@ -41,6 +39,10 @@ World::init()
   _ecs.registerComponent<SpriteAnimator>();
   _ecs.registerComponent<Identification>();
 
+  _sceneManager = std::make_unique<SceneManager>(_ecs);
+  _globalScript = std::make_unique<GlobalScriptSystem>();
+
+  // Core Systems
   registerMainSystems();
 
   // Lua Bindings
@@ -62,7 +64,7 @@ World::init()
   LuaBindings::bindAudio(lua, *_provider.service.audio);
 
   LuaBindings::bindCamera2D(lua, getCamera());
-  LuaBindings::bindSceneManager(lua, *_sceneManager, _ecs);
+  LuaBindings::bindSceneManager(lua, *_sceneManager);
   LuaBindings::bindAnimation(lua, _ecs);
 
   // ECS Event Bus

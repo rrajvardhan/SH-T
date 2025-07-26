@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AudioBrowser.hpp"
+#include "SceneBrowser.hpp"
 #include "ScriptBrowser.hpp"
 #include "ServiceContext.hpp"
 #include "TextureBrowser.hpp"
@@ -36,4 +37,5 @@ private:
   std::unique_ptr<TextureBrowser> _btexture;
   std::unique_ptr<ScriptBrowser>  _bscript;
   std::unique_ptr<AudioBrowser>   _baudio;
+  std::unique_ptr<SceneBrowser>   _bscene;
 };
