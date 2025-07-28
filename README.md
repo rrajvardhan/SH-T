@@ -13,6 +13,9 @@ Or simply,  **SH!T**  — attempt to build a 2D game engine prototype using SDL2
 ## A Quick Look
 
 ![Demo](assets/demo.gif)
+https://github.com/user-attachments/assets/897cec8d-a5f1-4f9d-b024-591b27a37fa1
+
+
 
 ## Build Instructions (Linux only)
 
