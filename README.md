@@ -10,6 +10,10 @@ Or simply,  **SH!T**  — attempt to build a 2D game engine prototype using SDL2
 * JSON-based scene and entity serialization
 * Modular managers for input, audio, textures, fonts, and more
 
+## A Quick Look
+
+![Demo](assets/demo.gif)
+
 ## Build Instructions (Linux only)
 
 ### Prerequisites
