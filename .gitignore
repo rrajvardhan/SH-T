@@ -31,7 +31,7 @@ Thumbs.db
 
 #project-specific
 assets/
-examples/
+example/
 build/
 TODO.md
 todo.md
