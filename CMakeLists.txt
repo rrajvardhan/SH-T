@@ -88,7 +88,6 @@ add_custom_command(TARGET main POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:main>/scripts
     COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:main>/scenes
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${ASSETS_DIR} $<TARGET_FILE_DIR:main>/assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${EXAMPLES_DIR} $<TARGET_FILE_DIR:main>/example
     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/imgui.ini $<TARGET_FILE_DIR:main>
     COMMENT "[INFO] Copied assets and created runtime folders."
 )
