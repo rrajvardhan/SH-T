@@ -1,0 +1,444 @@
+{
+  "entities": [
+    {
+      "Identification": {
+        "group": "None",
+        "name": "BG"
+      },
+      "Sprite": {
+        "blend mode": "blend",
+        "flip": "none",
+        "layer": -10,
+        "offset": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "rect": {
+          "h": 640,
+          "w": 1280,
+          "x": 0,
+          "y": 0
+        },
+        "scale": 1.0,
+        "textureId": "sickle_bg"
+      },
+      "Transform": {
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "rotation": 0.0
+      }
+    },
+    {
+      "Collider": {
+        "offset": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "x": 1600.0,
+          "y": 4.0
+        },
+        "static": true
+      },
+      "Identification": {
+        "group": "None",
+        "name": "Ground"
+      },
+      "Renderable": {
+        "color": {
+          "a": 255,
+          "b": 129,
+          "g": 105,
+          "r": 68
+        },
+        "shape": "RECT",
+        "size": {
+          "x": 1600.0,
+          "y": 4.0
+        }
+      },
+      "Transform": {
+        "position": {
+          "x": 0.0,
+          "y": 138.0
+        },
+        "rotation": 0.0
+      }
+    },
+    {
+      "Collider": {
+        "offset": {
+          "x": 3.0,
+          "y": 5.0
+        },
+        "size": {
+          "x": 31.0,
+          "y": 54.0
+        },
+        "static": false
+      },
+      "FollowCamera": {
+        "active": true
+      },
+      "Force": {
+        "vector": {
+          "x": 0.0,
+          "y": 2000.0
+        }
+      },
+      "Identification": {
+        "group": "None",
+        "name": "Warrior"
+      },
+      "RigidBody": {
+        "acceleration": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "mass": 1.0,
+        "velocity": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      },
+      "Sprite": {
+        "blend mode": "blend",
+        "flip": "none",
+        "layer": 0,
+        "offset": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "rect": {
+          "h": 64,
+          "w": 128,
+          "x": 0,
+          "y": 0
+        },
+        "scale": 2.0,
+        "textureId": "sickle_sheet"
+      },
+      "SpriteAnimator": {
+        "animations": [
+          {
+            "frames": [
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 0,
+                  "y": 128
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 128,
+                  "y": 128
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 256,
+                  "y": 128
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 384,
+                  "y": 128
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 512,
+                  "y": 128
+                }
+              }
+            ],
+            "name": "JUMP",
+            "speed": 200,
+            "textureId": "sickle_sheet"
+          },
+          {
+            "frames": [
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 0,
+                  "y": 64
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 128,
+                  "y": 64
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 256,
+                  "y": 64
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 384,
+                  "y": 64
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 512,
+                  "y": 64
+                }
+              }
+            ],
+            "name": "RUN",
+            "speed": 100,
+            "textureId": "sickle_sheet"
+          },
+          {
+            "frames": [
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 0,
+                  "y": 0
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 128,
+                  "y": 0
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 256,
+                  "y": 0
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 384,
+                  "y": 0
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 512,
+                  "y": 0
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 640,
+                  "y": 0
+                }
+              }
+            ],
+            "name": "IDLE",
+            "speed": 100,
+            "textureId": "sickle_sheet"
+          },
+          {
+            "frames": [
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 0,
+                  "y": 192
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 128,
+                  "y": 192
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 256,
+                  "y": 192
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 384,
+                  "y": 192
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 512,
+                  "y": 192
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 640,
+                  "y": 192
+                }
+              },
+              {
+                "offset": {
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "rect": {
+                  "h": 64,
+                  "w": 128,
+                  "x": 768,
+                  "y": 192
+                }
+              }
+            ],
+            "name": "ATTACK",
+            "speed": 60,
+            "textureId": "sickle_sheet"
+          }
+        ],
+        "currentAnim": "IDLE",
+        "currentFrame": 0,
+        "timer": 52.0
+      },
+      "Transform": {
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "rotation": 0.0
+      }
+    }
+  ],
+  "name": "Example_1"
+}

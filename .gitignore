@@ -46,7 +46,6 @@ build.ninja
 .ninja_log
 
 #project-specific
-example/
 build/
 TODO.md
 todo.md
