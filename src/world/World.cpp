@@ -54,7 +54,8 @@ World::init()
   LuaBindings::bindECSComponent<RigidBody>(lua, _ecs, "rigidbody");
   LuaBindings::bindECSComponent<Force>(lua, _ecs, "force");
   LuaBindings::bindECSComponent<FollowCamera>(lua, _ecs, "follow_camera");
-  LuaBindings::bindECSComponent<Identification>(lua, _ecs, "id");
+  LuaBindings::bindECSComponent<Identification>(lua, _ecs, "identification");
+  LuaBindings::bindECSComponent<Renderable>(lua, _ecs, "shape");
 
   LuaBindings::bindEntityLookup(lua, _ecs);
   // Services
@@ -62,6 +63,7 @@ World::init()
   LuaBindings::bindInput(lua, *_provider.service.input);
   LuaBindings::bindTimer(lua, *_provider.service.timer);
   LuaBindings::bindAudio(lua, *_provider.service.audio);
+  LuaBindings::bindGraphics(lua, *_provider.service.graphics);
 
   LuaBindings::bindCamera2D(lua, getCamera());
   LuaBindings::bindSceneManager(lua, *_sceneManager);

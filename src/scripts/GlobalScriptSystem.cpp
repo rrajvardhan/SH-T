@@ -15,6 +15,8 @@ GlobalScriptSystem::GlobalScriptSystem()
   _lua.set_function("publish_event",
                     [this](const std::string& eventName, sol::table payload)
                     { publish_lua(eventName, payload); });
+
+  _scriptPath = "scripts/main.lua";
 }
 
 void

@@ -9,7 +9,6 @@ RESET  := \033[0m
 CXX := g++
 BUILD_DIR := build
 BIN := $(BUILD_DIR)/main
-ASSETS_DST := $(BUILD_DIR)/assets
 OBJ_DIR := $(BUILD_DIR)/obj
 SRC_DIR := src
 INC_DIR := include
@@ -62,7 +61,14 @@ $(OBJ_DIR)/%.o: %.cpp
 
 # === Copy Assets to Build Folder ===
 copy_assets:
-	@mkdir -p $(ASSETS_DST)
+	@mkdir -p $(BUILD_DIR)/textures
+	@mkdir -p $(BUILD_DIR)/sounds
+	@mkdir -p $(BUILD_DIR)/scripts
+	@mkdir -p $(BUILD_DIR)/scenes
+	@cp -r assets $(BUILD_DIR)
+	@cp -r examples $(BUILD_DIR)
+	@cp  imgui.ini $(BUILD_DIR)
+
 	@echo -e "$(YELLOW)[INFO] Copied assets to build folder.$(RESET)"
 
 run: $(BIN)

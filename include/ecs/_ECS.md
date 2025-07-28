@@ -89,3 +89,6 @@ while (!quit) {
 ```
 
 ---
+
+**Heavily based on Austin Morlan’s ECS implementation,**
+**with adaptations to integrate cleanly into my engine’s architecture and workflow.**

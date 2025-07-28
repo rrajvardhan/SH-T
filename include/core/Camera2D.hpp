@@ -25,6 +25,11 @@ public:
   float getZoom() const { return _zoom; }
   void  setZoom(float zoom) { _zoom = std::max(0.1f, zoom); }
 
+  Vector2D screenToWorld(const Vector2D& screenPos) const
+  {
+    return Vector2D(screenPos.x / _zoom + _position.x, screenPos.y / _zoom + _position.y);
+  }
+
 private:
   int      _viewportWidth;
   int      _viewportHeight;

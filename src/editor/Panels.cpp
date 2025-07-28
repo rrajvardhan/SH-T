@@ -197,29 +197,29 @@ Editor::renderEntityPanel()
         if (ImGui::CollapsingHeader("Identification", header))
         {
           auto& i = _ecs.getComponent<Identification>(entity);
-          char  textureIdBuffer[128];
-          strncpy(textureIdBuffer, i.name.c_str(), sizeof(textureIdBuffer));
-          textureIdBuffer[sizeof(textureIdBuffer) - 1] = '\0';
+          char  nameBuffer[128];
+          strncpy(nameBuffer, i.name.c_str(), sizeof(nameBuffer));
+          nameBuffer[sizeof(nameBuffer) - 1] = '\0';
 
-          if (ImGui::InputText("textureId",
-                               textureIdBuffer,
-                               sizeof(textureIdBuffer),
+          if (ImGui::InputText("Name##Identification",
+                               nameBuffer,
+                               sizeof(nameBuffer),
                                ImGuiInputTextFlags_EnterReturnsTrue))
           {
             if (ImGui::IsItemDeactivatedAfterEdit())
-              i.name = std::string(textureIdBuffer);
+              i.name = std::string(nameBuffer);
           }
-          char gtextureIdBuffer[128];
-          strncpy(gtextureIdBuffer, i.group.c_str(), sizeof(gtextureIdBuffer));
-          gtextureIdBuffer[sizeof(gtextureIdBuffer) - 1] = '\0';
+          char gNameBuffer[128];
+          strncpy(gNameBuffer, i.group.c_str(), sizeof(gNameBuffer));
+          gNameBuffer[sizeof(gNameBuffer) - 1] = '\0';
 
-          if (ImGui::InputText("Group",
-                               gtextureIdBuffer,
-                               sizeof(gtextureIdBuffer),
+          if (ImGui::InputText("Group##Identification",
+                               gNameBuffer,
+                               sizeof(gNameBuffer),
                                ImGuiInputTextFlags_EnterReturnsTrue))
           {
             if (ImGui::IsItemDeactivatedAfterEdit())
-              i.group = std::string(gtextureIdBuffer);
+              i.group = std::string(gNameBuffer);
           }
 
           ImGui::NewLine();
@@ -489,6 +489,7 @@ Editor::renderControls()
 
   if (ImGui::Button(_active ? "Play " : "Pause"))
   {
+    _world.getScriptSystem().loadScript("scripts/main.lua");
     _active = !_active;
   }
 
@@ -497,6 +498,7 @@ Editor::renderControls()
   if (ImGui::Button("Reset"))
   {
     _world.getSceneManager().reset();
+    _world.getScriptSystem().reload();
   }
 
   ImGui::SameLine();

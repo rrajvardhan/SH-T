@@ -3,10 +3,13 @@
 #include "Camera2D.hpp"
 #include "CameraComponents.hpp"
 #include "CollisionComponents.hpp"
+#include "Graphics.hpp"
 #include "InputManager.hpp"
+#include "Log.hpp"
 #include "LuaBindings.hpp"
 #include "Overseer.hpp"
 #include "PhysicsComponents.hpp"
+#include "RenderableComponents.hpp"
 #include "SpriteComponents.hpp"
 #include "Timer.hpp"
 #include "Types.hpp"
@@ -20,9 +23,16 @@ namespace LuaBindings
 void
 bindECSCore(sol::state& lua, Overseer& ecs)
 {
+
+  lua.set_function("create_entity", [&ecs]() { return ecs.createEntity(); });
+
   // Vector2D
-  lua.new_usertype<Vector2D>(
-      "Vector2D", sol::constructors<Vector2D()>(), "x", &Vector2D::x, "y", &Vector2D::y);
+  lua.new_usertype<Vector2D>("Vector2D",
+                             sol::constructors<Vector2D(), Vector2D(float, float)>(),
+                             "x",
+                             &Vector2D::x,
+                             "y",
+                             &Vector2D::y);
 
   // Transform
   lua.new_usertype<Transform>("Transform",
@@ -83,6 +93,21 @@ bindECSCore(sol::state& lua, Overseer& ecs)
 
                      return cam;
                    });
+
+  // Renderable
+  lua.new_enum("ShapeType", "RECT", Renderable::RECT, "CIRCLE", Renderable::CIRCLE);
+
+  lua.new_usertype<SDL_Color>(
+      "Color", "r", &SDL_Color::r, "g", &SDL_Color::g, "b", &SDL_Color::b, "a", &SDL_Color::a);
+
+  lua.new_usertype<Renderable>("Renderable",
+                               sol::constructors<Renderable()>(),
+                               "size",
+                               &Renderable::size,
+                               "color",
+                               &Renderable::color,
+                               "shape",
+                               &Renderable::shape);
 }
 
 void
@@ -245,6 +270,14 @@ bindAudio(sol::state& lua, AudioManager& audio)
 }
 
 void
+bindGraphics(sol::state& lua, Graphics& graphics)
+{
+
+  lua.new_usertype<Graphics>("Graphics", "draw_line", &Graphics::drawLine);
+  lua["Graphics"] = &graphics;
+}
+
+void
 bindCamera2D(sol::state& lua, Camera2D& camera2D)
 {
   lua.new_usertype<Camera2D>("Camera2D",
@@ -261,6 +294,8 @@ bindCamera2D(sol::state& lua, Camera2D& camera2D)
                              &Camera2D::getViewportHeight,
                              "get_zoom",
                              &Camera2D::getZoom,
+                             "get_world_pos",
+                             &Camera2D::screenToWorld,
 
                              // Setters
                              "set_position",
@@ -291,11 +326,34 @@ lua_playAnimation(Overseer& ecs, Entity e, const std::string& animName)
 }
 
 void
+lua_setSpriteFlip(Overseer& ecs, Entity e, const std::string& flipMode)
+{
+  if (!ecs.hasComponent<Sprite>(e))
+    return;
+
+  auto& sprite = ecs.getComponent<Sprite>(e);
+
+  if (flipMode == "none" || flipMode == "horizontal" || flipMode == "vertical"
+      || flipMode == "both")
+  {
+    sprite.flip = flipMode;
+  }
+  else
+  {
+    LOG_DEBUG("[Lua] Invalid flip mode ", flipMode);
+  }
+}
+
+void
 bindAnimation(sol::state& lua, Overseer& ecs)
 {
   lua.set_function("play_animation",
                    [&ecs](Entity e, const std::string& animName)
                    { LuaBindings::lua_playAnimation(ecs, e, animName); });
+
+  lua.set_function("set_sprite_flip",
+                   [&ecs](Entity e, const std::string& flipMode)
+                   { LuaBindings::lua_setSpriteFlip(ecs, e, flipMode); });
 }
 
 } // namespace LuaBindings
