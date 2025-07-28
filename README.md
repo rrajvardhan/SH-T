@@ -13,6 +13,9 @@ Or simply,  **SH!T**  — attempt to build a 2D game engine prototype using SDL2
 ## A Quick Look
 https://github.com/user-attachments/assets/897cec8d-a5f1-4f9d-b024-591b27a37fa1
 
+*The sickle-wielding pixel warrior? Not mine. Credit goes to [Immortal_burrito](https://immortal-burrito.itch.io) for the [Sickle Warrior asset pack](https://immortal-burrito.itch.io/sickle-warrior).*
+
+
 ## Build Instructions (Linux only)
 
 ### Prerequisites
