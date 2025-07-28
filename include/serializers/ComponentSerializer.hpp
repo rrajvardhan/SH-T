@@ -6,6 +6,7 @@
 #include "PhysicsComponents.hpp"
 #include "RenderableComponents.hpp"
 #include "SpriteComponents.hpp"
+#include "TextComponents.hpp"
 #include "UtilComponents.hpp"
 
 namespace ComponentSerializer
@@ -30,6 +31,8 @@ void
 Serialize(JSONSerializer& s, const SpriteAnimator& animation);
 
 void
+Serialize(JSONSerializer& s, const TextComponent& text);
+void
 Deserialize(const JSON& j, Transform& t);
 void
 Deserialize(const JSON& j, RigidBody& rb);
@@ -47,4 +50,6 @@ void
 Deserialize(const JSON& j, Identification& id);
 void
 Deserialize(const JSON& j, SpriteAnimator& animation);
+void
+Deserialize(const JSON& j, TextComponent& text);
 }

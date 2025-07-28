@@ -158,6 +158,31 @@ Serialize(JSONSerializer& s, const SpriteAnimator& animator)
 }
 
 void
+Serialize(JSONSerializer& s, const TextComponent& text)
+{
+  s.StartNewObject("Text")
+      .AddKeyValuePair("text", text.text)
+      .AddKeyValuePair("fontId", text.fontId)
+      .StartNewObject("color")
+      .AddKeyValuePair("r", text.color.r)
+      .AddKeyValuePair("g", text.color.g)
+      .AddKeyValuePair("b", text.color.b)
+      .AddKeyValuePair("a", text.color.a)
+      .EndObject()
+      .StartNewObject("size")
+      .AddKeyValuePair("x", text.size.x)
+      .AddKeyValuePair("y", text.size.y)
+      .EndObject()
+      .StartNewObject("offset")
+      .AddKeyValuePair("x", text.offset.x)
+      .AddKeyValuePair("y", text.offset.y)
+      .EndObject()
+      .AddKeyValuePair("layer", text.layer)
+      .AddKeyValuePair("visible", text.visible)
+      .EndObject();
+}
+
+void
 Deserialize(const JSON& j, Transform& t)
 {
   t.position.x = j["position"]["x"];
@@ -267,5 +292,26 @@ Deserialize(const JSON& j, SpriteAnimator& animator)
     std::string name          = animJson["name"];
     animator.animations[name] = anim;
   }
+}
+
+void
+Deserialize(const JSON& j, TextComponent& text)
+{
+  text.text   = j.value("text", "Hello, world!");
+  text.fontId = j.value("fontId", "default");
+
+  text.color.r = j["color"]["r"];
+  text.color.g = j["color"]["g"];
+  text.color.b = j["color"]["b"];
+  text.color.a = j["color"]["a"];
+
+  text.size.x = j["size"]["x"];
+  text.size.y = j["size"]["y"];
+
+  text.offset.x = j["offset"]["x"];
+  text.offset.y = j["offset"]["y"];
+
+  text.layer   = j.value("layer", 0);
+  text.visible = j.value("visible", true);
 }
 }

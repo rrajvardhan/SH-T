@@ -14,6 +14,7 @@
 #include "SceneManager.hpp"
 #include "ServiceContext.hpp"
 #include "SpriteRender.hpp"
+#include "UI.hpp"
 #include <memory>
 
 class World
@@ -52,6 +53,7 @@ private:
   // Main Systems
   std::shared_ptr<PhysicsSystem>      physicsSystem;
   std::shared_ptr<RenderSystem>       renderSystem;
+  std::shared_ptr<UISystem>           uiSystem;
   std::shared_ptr<DebugDrawSystem>    debugDrawSystem;
   std::shared_ptr<CollisionSystem>    collisionSystem;
   std::shared_ptr<FollowCameraSystem> cameraSystem;

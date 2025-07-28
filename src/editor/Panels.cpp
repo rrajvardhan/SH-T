@@ -7,6 +7,7 @@
 #include "RenderableComponents.hpp"
 #include "ServiceContext.hpp"
 #include "SpriteComponents.hpp"
+#include "TextComponents.hpp"
 #include "Types.hpp"
 #include "UtilComponents.hpp"
 #include "World.hpp"
@@ -81,7 +82,7 @@ Editor::renderGamePanel()
       _world.getCamera().setZoom(currentZoom);
     }
 
-    if (ImGui::IsMouseDown(ImGuiMouseButton_Middle))
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
     {
       if (!dragging)
       {
@@ -429,6 +430,64 @@ Editor::renderEntityPanel()
         }
       }
 
+      if (_ecs.hasComponent<TextComponent>(entity))
+      {
+        if (ImGui::CollapsingHeader("Text", header))
+        {
+          auto& text = _ecs.getComponent<TextComponent>(entity);
+
+          char buffer[128];
+          strncpy(buffer, text.text.c_str(), sizeof(buffer));
+          buffer[sizeof(buffer) - 1] = '\0';
+
+          if (ImGui::InputText("Content##TextComponent",
+                               buffer,
+                               sizeof(buffer),
+                               ImGuiInputTextFlags_EnterReturnsTrue))
+          {
+            if (ImGui::IsItemDeactivatedAfterEdit())
+              text.text = std::string(buffer);
+          }
+
+          char fontBuffer[128];
+          strncpy(fontBuffer, text.fontId.c_str(), sizeof(fontBuffer));
+          fontBuffer[sizeof(fontBuffer) - 1] = '\0';
+
+          if (ImGui::InputText(
+                  "Font ID", fontBuffer, sizeof(fontBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+          {
+            if (ImGui::IsItemDeactivatedAfterEdit())
+              text.fontId = std::string(fontBuffer);
+          }
+
+          float color[4] = { text.color.r / 255.0f,
+                             text.color.g / 255.0f,
+                             text.color.b / 255.0f,
+                             text.color.a / 255.0f };
+          if (ImGui::ColorEdit4("Color", color))
+          {
+            text.color.r = static_cast<Uint8>(color[0] * 255.0f);
+            text.color.g = static_cast<Uint8>(color[1] * 255.0f);
+            text.color.b = static_cast<Uint8>(color[2] * 255.0f);
+            text.color.a = static_cast<Uint8>(color[3] * 255.0f);
+          }
+
+          ImGui::DragFloat2("Offset##Text", &text.offset.x, 1.0f);
+          ImGui::DragFloat2("Size##Text", &text.size.x, 1.0f);
+          ImGui::InputInt("Layer", &text.layer);
+          ImGui::Checkbox("Visible", &text.visible);
+
+          ImGui::NewLine();
+          ImGui::SameLine(ImGui::GetContentRegionAvail().x - 70);
+          if (ImGui::SmallButton(("Remove##TextComponent" + std::to_string(entity)).c_str()))
+          {
+            _ecs.removeComponent<TextComponent>(entity);
+          }
+
+          ImGui::Separator();
+        }
+      }
+
       // === Add Component ===
       if (ImGui::Button("Add Component"))
         ImGui::OpenPopup(("AddComponentPopup" + std::to_string(entity)).c_str());
@@ -460,6 +519,9 @@ Editor::renderEntityPanel()
           _ecs.addComponent<Sprite>(entity, {});
         if (!_ecs.hasComponent<SpriteAnimator>(entity) && ImGui::MenuItem("Animation"))
           _ecs.addComponent<SpriteAnimator>(entity, {});
+
+        if (!_ecs.hasComponent<TextComponent>(entity) && ImGui::MenuItem("Text"))
+          _ecs.addComponent<TextComponent>(entity, {});
 
         ImGui::EndPopup();
       }
@@ -499,6 +561,7 @@ Editor::renderControls()
   {
     _world.getSceneManager().reset();
     _world.getScriptSystem().reload();
+    _world.getCamera().setPosition(Vector2D(0, 0));
   }
 
   ImGui::SameLine();
@@ -554,7 +617,8 @@ Editor::renderControls()
             ComponentSerializer::Serialize(serializer, _ecs.getComponent<Identification>(entity));
           if (_ecs.hasComponent<SpriteAnimator>(entity))
             ComponentSerializer::Serialize(serializer, _ecs.getComponent<SpriteAnimator>(entity));
-
+          if (_ecs.hasComponent<TextComponent>(entity))
+            ComponentSerializer::Serialize(serializer, _ecs.getComponent<TextComponent>(entity));
           serializer.EndObject();
         }
 

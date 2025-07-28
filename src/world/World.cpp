@@ -4,12 +4,14 @@
 #include "Collision.hpp"
 #include "CollisionComponents.hpp"
 #include "DebugDraw.hpp"
+#include "Log.hpp"
 #include "LuaBindings.hpp"
 #include "Overseer.hpp"
 #include "Physics.hpp"
 #include "PhysicsComponents.hpp"
 #include "Renderable.hpp"
 #include "RenderableComponents.hpp"
+#include "SDL_scancode.h"
 #include "SpriteComponents.hpp"
 #include "SpriteRender.hpp"
 #include "Types.hpp"
@@ -38,6 +40,7 @@ World::init()
   _ecs.registerComponent<Sprite>();
   _ecs.registerComponent<SpriteAnimator>();
   _ecs.registerComponent<Identification>();
+  _ecs.registerComponent<TextComponent>();
 
   _sceneManager = std::make_unique<SceneManager>(_ecs);
   _globalScript = std::make_unique<GlobalScriptSystem>();
@@ -72,6 +75,8 @@ World::init()
   // ECS Event Bus
   _eventbus.subscribe(_globalScript.get(), &GlobalScriptSystem::onCollision);
 
+  _ctx.font->addFont("default", "assets/default.ttf", 32);
+
   return true;
 }
 
@@ -92,6 +97,14 @@ World::registerMainSystems()
     sig.set(_ecs.getComponentType<Renderable>());
     sig.set(_ecs.getComponentType<Transform>());
     _ecs.setSystemSignature<RenderSystem>(sig);
+  }
+
+  uiSystem = _ecs.registerSystem<UISystem>();
+  {
+    Signature sig;
+    sig.set(_ecs.getComponentType<TextComponent>());
+    sig.set(_ecs.getComponentType<Transform>());
+    _ecs.setSystemSignature<UISystem>(sig);
   }
 
   debugDrawSystem = _ecs.registerSystem<DebugDrawSystem>();
@@ -151,6 +164,7 @@ World::render()
 {
   spriteRenderSystem->update(_ecs, _provider);
   renderSystem->update(_ecs, _provider);
+  uiSystem->update(_ecs, _provider);
 
   if (isDebug)
     debugDrawSystem->update(_ecs, _provider);

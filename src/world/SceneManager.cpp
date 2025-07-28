@@ -4,6 +4,7 @@
 #include "Overseer.hpp"
 #include "SceneManager.hpp"
 #include "SpriteComponents.hpp"
+#include "TextComponents.hpp"
 
 SceneManager::SceneManager(Overseer& ecs) : _ecs(ecs)
 {
@@ -126,6 +127,13 @@ SceneManager::loadScene(const std::string& name)
       SpriteAnimator sa;
       ComponentSerializer::Deserialize(entityJson["SpriteAnimator"], sa);
       _ecs.addComponent(e, sa);
+    }
+
+    if (entityJson.contains("Text"))
+    {
+      TextComponent tx;
+      ComponentSerializer::Deserialize(entityJson["Text"], tx);
+      _ecs.addComponent(e, tx);
     }
   }
 
