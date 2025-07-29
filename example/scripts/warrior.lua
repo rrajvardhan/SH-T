@@ -138,6 +138,17 @@ function M.update(dt)
 		end
 	end
 
+	-- Fix collider offset on flip
+local collider = get_collider(warrior.id)
+if collider then
+	if Input:key_down(KEY_D) then
+		collider.offset.x = 6.0
+	elseif Input:key_down(KEY_A) then
+		collider.offset.x = -6.0
+	end
+end
+
+
 	-- Update current state
 	local nextState = warrior.state.update(dt)
 	if warrior.stateTimer <= 0 and nextState and states[nextState] and states[nextState] ~= warrior.state then
