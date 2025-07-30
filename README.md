@@ -46,3 +46,9 @@ cmake ..
 make
 ./main
 ```
+
+### Windows (Untested)
+
+The engine uses SDL2 abstraction and standard C++17, so it should theoretically work on Windows. You'd need the same dependencies (SDL2, SDL2_image, SDL2_ttf, SDL2_mixer, Lua) and ensure CMake can find them.1
+
+> *If you test this on Windows, feel free to submit a PR with working build instructions!*
