@@ -49,7 +49,6 @@ make
 
 ### Windows (Untested)
 
-### Windows (Untested)
 This should work on Windows. You'll need the same dependencies (SDL2, SDL2_image, SDL2_ttf, SDL2_mixer, Lua) and ensure CMake can find them.
 
 > *If you test this on Windows, feel free to submit a PR with working build instructions!*
