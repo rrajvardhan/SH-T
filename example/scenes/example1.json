@@ -114,7 +114,7 @@
         "rect": {
           "h": 64,
           "w": 128,
-          "x": 0,
+          "x": 128,
           "y": 0
         },
         "scale": 2.0,
@@ -428,17 +428,149 @@
           }
         ],
         "currentAnim": "IDLE",
-        "currentFrame": 0,
-        "timer": 52.0
+        "currentFrame": 1,
+        "timer": 89.0
       },
       "Transform": {
         "position": {
+          "x": 41.79999923706055,
+          "y": 103.0
+        },
+        "rotation": 0.0
+      }
+    },
+    {
+      "Identification": {
+        "group": "None",
+        "name": "Instruction_Mouse"
+      },
+      "Text": {
+        "color": {
+          "a": 255,
+          "b": 255,
+          "g": 255,
+          "r": 255
+        },
+        "fontId": "default",
+        "layer": 10,
+        "offset": {
           "x": 0.0,
           "y": 0.0
+        },
+        "size": {
+          "x": 300.0,
+          "y": 25.0
+        },
+        "text": "Pause to zoom/pan with mouse",
+        "visible": true
+      },
+      "Transform": {
+        "position": {
+          "x": -130.0,
+          "y": -100.0
+        },
+        "rotation": 0.0
+      }
+    },
+    {
+      "Identification": {
+        "group": "None",
+        "name": "Instruction_Move"
+      },
+      "Text": {
+        "color": {
+          "a": 255,
+          "b": 255,
+          "g": 255,
+          "r": 255
+        },
+        "fontId": "default",
+        "layer": 10,
+        "offset": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "x": 100.0,
+          "y": 25.0
+        },
+        "text": "Move: A / D",
+        "visible": true
+      },
+      "Transform": {
+        "position": {
+          "x": -130.0,
+          "y": -85.0
+        },
+        "rotation": 0.0
+      }
+    },
+    {
+      "Identification": {
+        "group": "None",
+        "name": "Instruction_Jump"
+      },
+      "Text": {
+        "color": {
+          "a": 255,
+          "b": 255,
+          "g": 255,
+          "r": 255
+        },
+        "fontId": "default",
+        "layer": 10,
+        "offset": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "x": 100.0,
+          "y": 25.0
+        },
+        "text": "Jump: SPACE",
+        "visible": true
+      },
+      "Transform": {
+        "position": {
+          "x": -130.0,
+          "y": -70.0
+        },
+        "rotation": 0.0
+      }
+    },
+    {
+      "Identification": {
+        "group": "None",
+        "name": "Instruction_Attack"
+      },
+      "Text": {
+        "color": {
+          "a": 255,
+          "b": 255,
+          "g": 255,
+          "r": 255
+        },
+        "fontId": "default",
+        "layer": 10,
+        "offset": {
+          "x": 0.0,
+          "y": 0.0
+        },
+        "size": {
+          "x": 100.0,
+          "y": 25.0
+        },
+        "text": "Attack: J",
+        "visible": true
+      },
+      "Transform": {
+        "position": {
+          "x": -130.0,
+          "y": -55.0
         },
         "rotation": 0.0
       }
     }
   ],
-  "name": "Example_1"
+  "name": "example1"
 }
