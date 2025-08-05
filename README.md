@@ -38,7 +38,7 @@ Install dependencies using your preferred package manager (`pacman`, `apt`, `dnf
 > Package names may vary slightly depending on your distro. For example, some systems use libsdl2-dev instead of sdl2.
 
 ```bash
-sudo pacman -S sdl2 sdl2_image sdl2_ttf sdl2_mixer lua cmake make nlohmann-json gcc
+sudo pacman -S sdl2 sdl2_image sdl2_ttf sdl2_mixer lua cmake make nlohmann-json
 ```
 
 Then clone, build, and run:
