@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/897cec8d-a5f1-4f9d-b024-591b27a37fa1
 *The sickle-wielding pixel warrior? Not mine. Credit goes to [Immortal_burrito](https://immortal-burrito.itch.io) for the [Sickle Warrior asset pack](https://immortal-burrito.itch.io/sickle-warrior).*
 
 
-## Build Instructions (Linux only)
+## Build Instructions
 
 ### Prerequisites
 
@@ -28,15 +28,20 @@ You’ll need the following dependencies installed:
 * SDL2\_mixer
 * Lua
 * CMake
+* nlohmann-json
 * A C++17 compatible compiler
 
-Install on Arch Linux:
+### Linux
+
+Install dependencies using your preferred package manager (`pacman`, `apt`, `dnf`, etc).
+
+> Package names may vary slightly depending on your distro. For example, some systems use libsdl2-dev instead of sdl2.
 
 ```bash
-sudo pacman -S sdl2 sdl2_image sdl2_ttf sdl2_mixer lua cmake make gcc
+sudo pacman -S sdl2 sdl2_image sdl2_ttf sdl2_mixer lua cmake make nlohmann-json gcc
 ```
 
-### Build
+Then clone, build, and run:
 
 ```bash
 git clone https://github.com/rrajvardhan/SH-T
@@ -47,8 +52,22 @@ make
 ./main
 ```
 
-### Windows (Untested)
+> If CMake can’t find a dependency, you may need to manually specify include/library paths or adjust your environment variables.
 
-This should work on Windows. You'll need the same dependencies (SDL2, SDL2_image, SDL2_ttf, SDL2_mixer, Lua) and ensure CMake can find them.
+### Windows (Untested, but theoretically possible)
+
+It should work. You’ll need to install the same dependencies, and then ensure CMake can find them.
 
 > *If you test this on Windows, feel free to submit a PR with working build instructions!*
+
+## Try the Example
+
+You can try the exact scene shown above.
+
+After building, copy the example assets into your `build/` directory and run the engine:
+
+```bash
+# From inside the build/ directory
+cp -r ../example/* .
+./main
+```
