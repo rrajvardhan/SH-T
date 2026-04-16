@@ -35,6 +35,7 @@ include_directories(
 )
 
 add_executable(main ${SRC_FILES})
+target_compile_definitions(main PRIVATE USE_STD_FILESYSTEM)
 
 # === Dependency Handling ===
 if(WIN32)
