@@ -26,7 +26,7 @@ You’ll need the following dependencies installed:
 * SDL2\_image
 * SDL2\_ttf
 * SDL2\_mixer
-* Lua
+* Lua (5.1 - 5.4 for Sol2 compatibility)
 * CMake
 * nlohmann-json
 * A C++20 compatible compiler
@@ -58,7 +58,7 @@ make
 
 Install Visual Studio 2026 with **Desktop development with C++**, along with CMake, Git, and vcpkg.
 
-> Windows support is currently untested. If you get it working and find anything that needs fixing, feel free to open a PR.
+> Installation should work, but complete functionality is currently untested. If you run into Sol2 compatibility issues, make sure you're using a supported Lua version (5.1–5.4) and that CMake is picking up the correct Lua headers and libraries. Multiple Lua installations can cause CMake to use the wrong version, which may lead to build errors.
 
 Then clone, build, and run:
 
@@ -74,7 +74,7 @@ cmake --build . --config Release
 
 > Install the required dependencies with vcpkg if they are not already declared and automatically restored through `vcpkg.json`.
 
-> If you run into Sol2 compatibility issues, make sure you're using a supported Lua version (5.1–5.4) and that CMake is picking up the correct Lua headers and libraries. Multiple Lua installations can cause CMake to use the wrong version, which may lead to build errors.
+> 
 
 ## Try the Example
 
