@@ -60,28 +60,22 @@ if(WIN32)
     )
 
 elseif(UNIX)
-    # Native Linux packages
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(SDL2 REQUIRED sdl2)
-    pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
-    pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
-    pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
-    find_package(Lua REQUIRED)
 
-    include_directories(
-        ${SDL2_INCLUDE_DIRS}
-        ${SDL2_IMAGE_INCLUDE_DIRS}
-        ${SDL2_TTF_INCLUDE_DIRS}
-        ${SDL2_MIXER_INCLUDE_DIRS}
-        ${LUA_INCLUDE_DIR}
-    )
+    pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2)
+    pkg_check_modules(SDL2_IMAGE REQUIRED IMPORTED_TARGET SDL2_image)
+    pkg_check_modules(SDL2_TTF REQUIRED IMPORTED_TARGET SDL2_ttf)
+    pkg_check_modules(SDL2_MIXER REQUIRED IMPORTED_TARGET SDL2_mixer)
 
-    target_link_libraries(main
-        ${SDL2_LIBRARIES}
-        ${SDL2_IMAGE_LIBRARIES}
-        ${SDL2_TTF_LIBRARIES}
-        ${SDL2_MIXER_LIBRARIES}
-        ${LUA_LIBRARIES}
+    # Explicitly require Lua 5.4
+    pkg_check_modules(LUA54 REQUIRED IMPORTED_TARGET lua5.4)
+
+    target_link_libraries(main PRIVATE
+        PkgConfig::SDL2
+        PkgConfig::SDL2_IMAGE
+        PkgConfig::SDL2_TTF
+        PkgConfig::SDL2_MIXER
+        PkgConfig::LUA54
     )
 endif()
 
