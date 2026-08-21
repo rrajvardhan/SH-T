@@ -14,6 +14,11 @@ main
 /build/
 /bin/
 /obj/
+/vcpkg_installed/
+.vs/
+*.vcxproj
+*.sln
+
 
 # OS-specific
 .DS_Store

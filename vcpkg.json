@@ -1,0 +1,20 @@
+{
+  "name": "sh-t",
+  "version-string": "1.0.0",
+  "dependencies": [
+    "lua",
+    "sdl2",
+    "sdl2-image",
+    "sdl2-ttf",
+    "sdl2-mixer",
+		"nlohmann-json"
+
+  ],
+  "overrides": [
+    {
+      "name": "lua",
+      "version": "5.4.8"
+    }
+  ],
+  "builtin-baseline": "796994ac3e72b9c98b33826365ce732472ab7264"
+}

@@ -1,6 +1,6 @@
 
-#include "ImGuiFileDialog.h"
 #include "SceneBrowser.hpp"
+#include "ImGuiFileDialog.h"
 #include "imgui.h"
 #include <filesystem>
 #include <fstream>
@@ -24,7 +24,7 @@ SceneBrowser::loadScenes()
     if (entry.path().extension() == ".json")
     {
       _sceneFiles.push_back(entry.path().filename().string());
-      _scenes.addScene(entry.path());
+      _scenes.addScene(entry.path().string());
     }
   }
 }

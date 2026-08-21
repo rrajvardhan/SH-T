@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 project(SH-T LANGUAGES CXX)
 
 # === Compiler Settings ===
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -35,7 +35,8 @@ include_directories(
 )
 
 add_executable(main ${SRC_FILES})
-target_compile_definitions(main PRIVATE USE_STD_FILESYSTEM)
+target_compile_definitions(main PRIVATE USE_STD_FILESYSTEM SDL_MAIN_HANDLED
+)
 
 # === Dependency Handling ===
 if(WIN32)
@@ -45,14 +46,17 @@ if(WIN32)
     find_package(SDL2_ttf CONFIG REQUIRED)
     find_package(SDL2_mixer CONFIG REQUIRED)
     find_package(lua CONFIG REQUIRED)
+		find_package(nlohmann_json CONFIG REQUIRED)
+
 
     target_link_libraries(main
-        SDL2::SDL2main
+        # SDL2::SDL2main
         SDL2::SDL2
         SDL2_image::SDL2_image
         SDL2_ttf::SDL2_ttf
         SDL2_mixer::SDL2_mixer
-        lua::lua
+        lua
+				nlohmann_json::nlohmann_json
     )
 
 elseif(UNIX)

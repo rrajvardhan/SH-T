@@ -35,17 +35,17 @@ AudioBrowser::loadAudioFiles()
     if (name.rfind("bgm_", 0) == 0)
     {
       _musicIDs.push_back(name);
-      _audioManager.addMusic(name, path);
+      _audioManager.addMusic(name, path.string());
     }
     else if (name.rfind("sfx_", 0) == 0)
     {
       _sfxIDs.push_back(name);
-      _audioManager.addSFX(name, path);
+      _audioManager.addSFX(name, path.string());
     }
     else
     {
       _sfxIDs.push_back(name);
-      _audioManager.addSFX(name, path);
+      _audioManager.addSFX(name, path.string());
     }
 
     if (_musicVolumes.find(name) == _musicVolumes.end())
