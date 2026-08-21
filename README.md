@@ -60,6 +60,28 @@ It should work. You’ll need to install the same dependencies, and then ensure 
 
 > *If you test this on Windows, feel free to submit a PR with working build instructions!*
 
+Install Visual Studio 2026 with Desktop development with C++, CMake, Git, and vcpkg.
+
+Clone and build:
+
+git clone https://github.com/rrajvardhan/SH-T
+cd SH-T
+mkdir build
+cd build
+
+cmake .. -G "Visual Studio 18 2026" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+
+cmake --build . --config Release
+
+Run:
+
+.\Release\main.exe
+
+vcpkg automatically installs the dependencies specified in vcpkg.json.
+
+
+
+
 ## Try the Example
 
 You can try the exact scene shown above.

@@ -8,8 +8,8 @@ struct RendererConfig
   const char* title         = "Untitled";
   int         x             = SDL_WINDOWPOS_CENTERED;
   int         y             = SDL_WINDOWPOS_CENTERED;
-  int         width         = 1600;
-  int         height        = 900;
+  int         width         = 1280;
+  int         height        = 720;
   int         windowFlags   = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
   int         rendererFlags = SDL_RENDERER_ACCELERATED;
 };
