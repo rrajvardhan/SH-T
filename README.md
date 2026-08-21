@@ -29,7 +29,7 @@ You’ll need the following dependencies installed:
 * Lua
 * CMake
 * nlohmann-json
-* A C++17 compatible compiler
+* A C++20 compatible compiler
 
 ### Linux
 
@@ -54,33 +54,27 @@ make
 
 > If CMake can’t find a dependency, you may need to manually specify include/library paths or adjust your environment variables.
 
-### Windows (Untested, but theoretically possible)
+### Windows
 
-It should work. You’ll need to install the same dependencies, and then ensure CMake can find them.
+Install Visual Studio 2026 with **Desktop development with C++**, along with CMake, Git, and vcpkg.
 
-> *If you test this on Windows, feel free to submit a PR with working build instructions!*
+> Windows support is currently untested. If you get it working and find anything that needs fixing, feel free to open a PR.
 
-Install Visual Studio 2026 with Desktop development with C++, CMake, Git, and vcpkg.
+Then clone, build, and run:
 
-Clone and build:
-
+```powershell
 git clone https://github.com/rrajvardhan/SH-T
 cd SH-T
 mkdir build
 cd build
-
 cmake .. -G "Visual Studio 18 2026" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
-
 cmake --build . --config Release
-
-Run:
-
 .\Release\main.exe
+```
 
-vcpkg automatically installs the dependencies specified in vcpkg.json.
+> Install the required dependencies with vcpkg if they are not already declared and automatically restored through `vcpkg.json`.
 
-
-
+> If you run into Sol2 compatibility issues, make sure you're using a supported Lua version (5.1–5.4) and that CMake is picking up the correct Lua headers and libraries. Multiple Lua installations can cause CMake to use the wrong version, which may lead to build errors.
 
 ## Try the Example
 
